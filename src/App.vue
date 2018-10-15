@@ -1,18 +1,22 @@
 <template>
   <div id="app">
-    <!-- <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/> -->
+        <ul class="nav" v-if="$route.name != 'list'">
+            <li><router-link :to="{ name: 'list' }">Back</router-link></li>
+        </ul>
     <router-view></router-view>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+
 
 export default {
   name: 'app',
   components: {
-    HelloWorld
+  },
+
+  methods: {
+
   }
 }
 </script>
@@ -24,6 +28,27 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  /* margin: 10px; */
+  /* padding-top: 20px; */
 }
+
+  .nav {
+    display: flex;
+    list-style: none;
+    padding: 10px 0;
+    margin: 0;
+    justify-content: flex-end;
+    background: #F5F8FA;
+    border-bottom: 1px solid lightgrey;
+    margin-bottom: 24px;
+  }
+  .nav a {
+    color: #636b6f;
+    padding: 0 25px;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: .1rem;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
 </style>
