@@ -1,9 +1,11 @@
 
 <template>
-    <div>
-        <div class="content">Effor Estimation List</div>
-        <b-table id="my-table" striped hover :items="items"></b-table>
-    </div>
+<b-container fluid="">
+    <div class="title"><h1>Effort Estimation Management</h1></div>
+    <b-table id="my-table" striped hover :items="items" caption-top>
+    </b-table>
+</b-container>
+
 </template>
 
 <script>
@@ -34,25 +36,21 @@ export default {
         ]
     };
   },
-
-//   created(){
-//       this.$root.$emit('bv::refresh::table', 'my-table');
-//   }
 }
 </script>
 
 
 <style>
-.content {
+.title {
     font-family: 'Avenir', Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
     color: #2c3e50;
-    margin-top: 20px;
     align-content: center;
-    font-size: 24px;
+    /* font-size: 36px; */
     font-weight: bold;
-    margin-bottom: 10px;
+    margin-bottom: 30px;
 }
+
 </style>
