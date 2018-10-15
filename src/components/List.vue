@@ -28,7 +28,7 @@ export default {
                     id: '00002', 
                     projectId: 'SFSCO-8',
                     projectScope: 'Inclusão de campo em relatório',
-                    userid: 'odenir.tobias.ext@tivit.com',
+                    userid: 'murilo.pedrico@tivit.com',
                     datetime: '2018-09-29T15:28:23-03:00',
                     account: '0040003300-04',
                     crmTicket: 'TVT555551',
