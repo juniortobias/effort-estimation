@@ -1,8 +1,5 @@
 <template>
   <div id="app">
-        <ul class="nav" v-if="$route.name != 'list'">
-            <li><router-link :to="{ name: 'list' }">Back</router-link></li>
-        </ul>
     <router-view></router-view>
   </div>
 </template>

@@ -1,15 +1,16 @@
 
 <template>
 <b-container fluid>
-    <div class="title"><h2>Effort Estimation Management - List</h2></div>
+    <div class="title"><h2>Effort Estimation Management</h2></div>
     <b-row><b-btn size="lg" variant="danger" class="btnAdd">&plus;</b-btn></b-row>
     <b-table id="my-table" hover responsive :items="$store.state.efforts" @row-clicked="rowClicked">
         <template slot="HEAD_items" slot-scope="data">
-
         </template>
         <template slot="items" slot-scope="data">
-
-        </template>        
+        </template>
+        <template slot="status" slot-scope="data">
+            <b-badge variant="dark">{{ data.item.status }}</b-badge>
+        </template>  
     </b-table>
 </b-container>
 
@@ -26,7 +27,7 @@ export default {
     },
     methods:{
       rowClicked(record, index) {
-          this.$router.push({name:'list-detail', params: {id: record.id} })
+          this.$router.push({name:'list-detail', params: {id: record.id, idx: index} })
       }
   },
 }
@@ -41,10 +42,9 @@ export default {
     text-align: center;
     color: #2c3e50;
     align-content: center;
-    /* font-size: 36px; */
     font-weight: bold;
     margin-bottom: 30px;
-    margin-top: 20px;
+    margin-top: 50px;
 }
 
 .btnAdd {
