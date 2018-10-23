@@ -33,7 +33,7 @@ export const store = new Vuex.Store({
                             description: 'Definição de escopo',
                             profile: 'Architecture',
                             role: 'Solutions Architecture',
-                            level: 'L',
+                            level: 'Very Low',
                             quantity: 1,
                             execution: 32,
                             documentation: 8,
@@ -48,7 +48,7 @@ export const store = new Vuex.Store({
                             role: 'Sales and Distribuition (SD)',
                             documentation: 8,
                             execution: 16,
-                            level: 'L',
+                            level: 'Low',
                             quantity: 1,                        
                             projectManagement: 8,
                             tests: 2,
@@ -61,12 +61,59 @@ export const store = new Vuex.Store({
                             role: 'Solutions Architect',
                             documentation: 8,
                             execution: 24,
-                            level: 'L',
+                            level: 'High',
                             quantity: 1,                        
                             projectManagement: 8,
                             tests: 2,
                         },
                     ],
+                    roadmap: [
+                        {
+                            'phase':'Project Preparation',
+                            'architecture': '0',
+                            'functional': '0',
+                            'integration': '0',
+                            'development': '0',
+                            'projectmanagement':'0',
+                            'documentation':'0'
+                        },
+                        {
+                            'phase':'Business Blueprint',
+                            'architecture': '0',
+                            'functional': '0',
+                            'integration': '0',
+                            'development': '0',
+                            'projectmanagement':'0',
+                            'documentation':'0'
+                        }, 
+                        {
+                            'phase':'Realization',
+                            'architecture': '0',
+                            'functional': '0',
+                            'integration': '0',
+                            'development': '0',
+                            'projectmanagement':'0',
+                            'documentation':'0'
+                        },
+                        {
+                            'phase':'Final Preparation',
+                            'architecture': '0',
+                            'functional': '0',
+                            'integration': '0',
+                            'development': '0',
+                            'projectmanagement':'0',
+                            'documentation':'1'
+                        }, 
+                        {
+                            'phase':'Go-Live',
+                            'architecture': '0',
+                            'functional': '0',
+                            'integration': '0',
+                            'development': '0',
+                            'projectmanagement':'0',
+                            'documentation':'0'
+                        }, 
+                    ]
                 },
                 { 
                     id: '00002', 
@@ -86,7 +133,7 @@ export const store = new Vuex.Store({
                             description: 'Definição de escopo',
                             profile: 'Architecture',
                             role: 'Solutions Architecture',
-                            level: 'L',
+                            level: 'Very High',
                             quantity: 1,
                             execution: 8,
                             documentation: 8,
@@ -94,6 +141,53 @@ export const store = new Vuex.Store({
                             tests: 2,
                         },
                     ],
+                    roadmap: [
+                        {
+                            'phase':'Project Preparation',
+                            'architecture': '0',
+                            'functional': '0',
+                            'integration': '0',
+                            'development': '0',
+                            'projectmanagement':'0',
+                            'documentation':'0'
+                        },
+                        {
+                            'phase':'Business Blueprint',
+                            'architecture': '0',
+                            'functional': '0',
+                            'integration': '0',
+                            'development': '0',
+                            'projectmanagement':'0',
+                            'documentation':'0'
+                        }, 
+                        {
+                            'phase':'Realization',
+                            'architecture': '0',
+                            'functional': '0',
+                            'integration': '0',
+                            'development': '0',
+                            'projectmanagement':'0',
+                            'documentation':'0'
+                        },
+                        {
+                            'phase':'Final Preparation',
+                            'architecture': '0',
+                            'functional': '0',
+                            'integration': '0',
+                            'development': '0',
+                            'projectmanagement':'0',
+                            'documentation':'0'
+                        }, 
+                        {
+                            'phase':'Go-Live',
+                            'architecture': '0',
+                            'functional': '0',
+                            'integration': '0',
+                            'development': '0',
+                            'projectmanagement':'0',
+                            'documentation':'0'
+                        }, 
+                    ]
                 },                
             ]
         
@@ -113,9 +207,26 @@ export const store = new Vuex.Store({
         destroyToken(state) {
             state.token = null
         },
+
+        saveEffort(state, effort) {
+            state.efforts.push(effort)
+        },
+
+        updateEffort(state, effort) {
+            const index = state.efforts.findIndex(item => item.id == effort.id)
+            state.efforts.splice(index, 1, effort)
+        }
     },
 
     actions: {
+        saveEffort(context, effort) {
+            context.commit('saveEffort',effort)
+        },
+
+        updateEffort(context, effort) {
+            context.commit('updateEffort',effort)
+        },
+
         destroyToken(context) {
             if (context.getters.loggedIn) {
                 //chamada de serviço para logout - descobrir qual é...

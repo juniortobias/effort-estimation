@@ -43,65 +43,66 @@
                 <b-col sm="2"><b-form-input :id="'account'" :disabled=this.disabled v-model="effort.account"></b-form-input></b-col>
             </b-row>          
         </b-card>
-
+        <p>{{documentation}}</p>
         <br>
             <b-container fluid>
-            <b-row><b-btn size="lg" variant="danger" class="btnAdd" @click="addActivity" disabled>&plus;</b-btn></b-row>
+            <b-row><b-btn size="lg" variant="danger" class="btnAdd" @click="addActivity" :disabled=this.disabled>&plus;</b-btn></b-row>
             <table class="actTable">
                 <tr>
                     <th>ID</th>
                     <th>Activity</th>
                     <th>Description</th>
                     <th>Profile</th>
-                    <th>Role</th>
-                    <th>Level</th>
-                    <th>Quantity</th>
-                    <th>Execution</th>
-                    <th>Documentation</th>
-                    <th>Project Management</th>
-                    <th>Unit Tests</th>
+                    <th >Role</th>
+                    <th style="width:100px">Level</th>
+                    <th style="width:1px">Quantity</th>
+                    <th style="width:1px">Execution</th>
+                    <th style="width:1px">Documentation</th>
+                    <th style="width:170px">Project Management</th>
+                    <th v-if="!disabled" style="text-align: center;"><img src="../assets/menu.png"></th>
                 </tr>
 
                     <tr v-for="item in effort.items" :key="item.id">
                         <td>{{item.id}}</td>
-                        <td :contenteditable=!disabled>{{item.activity}}</td>
-                        <td :contenteditable=!disabled>{{item.description}}</td>
-                        <td :contenteditable=!disabled>{{item.profile}}</td>
-                        <td :contenteditable=!disabled>{{item.role}}</td>
-                        <td :contenteditable=!disabled>{{item.level}}</td>
-                        <td :contenteditable=!disabled>{{item.quantity}}</td>
-                        <td :contenteditable=!disabled>{{item.execution}}</td>
-                        <td :contenteditable=!disabled>{{item.documentation}}</td>
-                        <td :contenteditable=!disabled>{{item.projectManagement}}</td>
-                        <td :contenteditable=!disabled>{{item.tests}}</td>
+                        <td><input :disabled=disabled v-model="item.activity" v-bind:class="inputClass"></td>
+                        <td><input :disabled=disabled v-model="item.description" v-bind:class="inputClass"></td>
+                        <td><select :disabled=disabled v-bind:class="inputClass"><optgroup><option>{{item.profile}}</option></optgroup></select></td>
+                        <td><input :disabled=disabled v-model="item.role" v-bind:class="inputClass"></td>
+                        <td><input :disabled=disabled v-model="item.level" v-bind:class="inputClass"></td>
+                        <td><input :disabled=disabled v-model="item.quantity" v-bind:class="inputClass" @change="defineItem(item.id)"></td>
+                        <td><input :disabled=disabled v-model="item.execution" v-bind:class="inputClass" @change="defineItem(item.id)"></td>
+                        <td><input :disabled=disabled v-model="item.documentation" class="classView"></td>
+                        <td><input :disabled=disabled v-model="item.projectManagement" class="classView"></td>    
+                        <td v-if="!disabled" class="itemControl" ><img src="../assets/garbage.png" @click="removeItem(item.id)"></td>    
                     </tr>
             </table>
             </b-container>
+            
+            <br>
 
+            <b-container fluid>
+            <table class="roadmapTable">
+                <tr>
+                    <th style="width:300px">Phase</th>
+                    <th>Architecture <b-badge>{{ sumArchitecture }}</b-badge></th>
+                    <th>Functional <b-badge>{{ sumFunctional }}</b-badge></th>
+                    <th>Integration <b-badge>{{ sumIntegration }}</b-badge></th>
+                    <th>Development <b-badge>{{ sumDevelopment }}</b-badge></th>
+                    <th>Project Management <b-badge>{{ sumProjectManagement }}</b-badge></th>
+                    <th>Documentation <b-badge>{{ sumDocumentation }}</b-badge></th>
+                </tr>
 
-        <br>
-        <b-container fluid>
-            <b-table id="roadmap" hover responsive small :items="roadmapItems" :fields="roadmapFields">
-            <template slot="HEAD_architecture" slot-scope="data">
-                {{data.label}} <b-badge>{{ sumArchitecture }}</b-badge>
-            </template>
-            <template slot="HEAD_functional" slot-scope="data">
-                {{data.label}} <b-badge>{{ sumFunctional }}</b-badge>
-            </template>
-            <template slot="HEAD_integration" slot-scope="data">
-                {{data.label}} <b-badge>{{ sumIntegration }}</b-badge>
-            </template>
-            <template slot="HEAD_development" slot-scope="data">
-                {{data.label}} <b-badge>{{ sumDevelopment }}</b-badge>
-            </template>
-            <template slot="HEAD_projectManagement" slot-scope="data">
-                {{data.label}} <b-badge>{{ sumProjectManagement }}</b-badge>
-            </template>     
-            <template slot="HEAD_documentation" slot-scope="data">
-                {{data.label}} <b-badge>{{ sumDocumentation }}</b-badge>
-            </template>            
-            </b-table>
-        </b-container>
+                    <tr v-for="item in effort.roadmap" :key="item.phase">
+                        <td>{{item.phase}}</td>
+                        <td><input :disabled=disabled v-model="item.architecture" v-bind:class="inputClass" type="number"></td>
+                        <td><input :disabled=disabled v-model="item.functional" v-bind:class="inputClass"></td>
+                        <td><input :disabled=disabled v-model="item.integration" v-bind:class="inputClass"></td>
+                        <td><input :disabled=disabled v-model="item.development" v-bind:class="inputClass"></td>
+                        <td><input :disabled=disabled v-model="item.projectmanagement" v-bind:class="inputClass"></td>
+                        <td><input :disabled=disabled v-model="item.documentation" v-bind:class="inputClass"></td>
+                    </tr>
+            </table>
+            </b-container>            
     </div>
 </template>
 
@@ -111,127 +112,114 @@ export default {
     name: 'list-detail',
     data () {
         return {
+            inputClass:{ 'classView': true, 'classEdit':false },
             disabled: true,
-            effort: Object,
-            sumArchitecture: 0,
-            sumFunctional: 0,
-            sumIntegration: 0,
-            sumDevelopment: 0,
-            sumProjectManagement: 0,
-            sumDocumentation: 0,
-            // actFields:[{ key:'activity', disabled:false }],
-            roadmapFields: ['activity', 'architecture', 'functional', 'integration', 'development', 'projectManagement', 'documentation'],
-            roadmapItems: [
-            {
-                'activity':'Project Preparation',
-                'architecture': '0',
-                'functional': '0',
-                'integration': '0',
-                'development': '0',
-                'projectManagement':'0',
-                'documentation':'0'
-            },
-            {
-                'activity':'Business Blueprint',
-                'architecture': '0',
-                'functional': '0',
-                'integration': '0',
-                'development': '0',
-                'projectManagement':'0',
-                'documentation':'0'
-            }, 
-            {
-                'activity':'Realization',
-                'architecture': '0',
-                'functional': '0',
-                'integration': '0',
-                'development': '0',
-                'projectManagement':'0',
-                'documentation':'0'
-            },
-            {
-                'activity':'Final Preparation',
-                'architecture': '0',
-                'functional': '4',
-                'integration': '0',
-                'development': '0',
-                'projectManagement':'0',
-                'documentation':'0'
-            }, 
-            {
-                'activity':'Go-Live',
-                'architecture': '1',
-                'functional': '0',
-                'integration': '0',
-                'development': '0',
-                'projectManagement':'0',
-                'documentation':'0'
-            }, 
-        ]        
+            effort: JSON.parse(JSON.stringify(this.$store.state.efforts[this.$route.params.idx])),
+            beforeEditCache: Object,
     }
   },
-    watch: {
-        effort() {
 
-        }
+    computed: {
+        documentation: function () {
+
+        },
+
+        sumArchitecture: function () {
+            return this.sum('Architecture')
+        },
+        sumFunctional: function () {
+            return this.sum('Functional')
+        },
+        sumIntegration: function () {
+            return this.sum('Integration')
+        },
+        sumDevelopment: function () {
+            return this.sum('Development')
+        },
+        sumProjectManagement: function () {
+            return this.sum('projectmanagement')
+        },
+        sumDocumentation: function () {
+            return this.sum('documentation')
+        },
     },
 
-    created() {
-        this.effort = JSON.parse(JSON.stringify(this.$store.state.efforts[this.$route.params.idx]))
-
-        this.sumArchitecture = this.sum('Architecture')
-        this.sumFunctional   = this.sum('Functional')
-        this.sumIntegration  = this.sum('Integration')
-        this.sumDevelopment  = this.sum('Development')
-    },
 
     methods: {
         sum(term) {
+
             let sum = 0
             let allocated = 0
             var value = 0
 
-            let items = this.$store.state.efforts[this.$route.params.idx].items
+            let items = this.effort.items
             for (const key1 in items) {
                 const element = items[key1];
-                    if (element.profile == term) {
-                        sum = sum + (element.execution * element.quantity)
-                    }
+                if (term == 'documentation') {
+                    sum = sum + element.documentation
+                }
+
+                if (term == 'projectmanagement') {
+                    sum = sum + element.projectManagement
+                }
+
+                if (element.profile == term) {
+                    sum = sum + (element.execution * element.quantity)
+                }
             }
 
-            for (var key1 in this.roadmapItems) {
-                let roadmap = this.roadmapItems[key1]
+            for (var key1 in this.effort.roadmap) {
+                let roadmap = this.effort.roadmap[key1]
 
                 value = parseInt(roadmap[term.toLowerCase()])
                 allocated = allocated + value
-        }
+            }
 
             return sum - allocated
-
         },
 
-    addActivity() {
-        
-    },
+        addActivity() {
+            let pk
 
-    backToList() {
-        this.$router.push({ name: "list" });
-    },
+            for (const key1 in this.effort.items) {
+                const element = this.effort.items[key1]
+                pk = element.id
+            }
 
-    editEffort() {
-        this.disabled = false
-        
-    },
+            pk = parseInt(pk) + 1
+            this.effort.items.push({id:pk})
+        },
 
-    cancelEdit() {
-        this.disabled = true
-        this.effort = Object.assign(this.$store.state.efforts[parseInt(this.$route.params.idx)])
-    },
+        backToList() {
+            this.$router.push({ name: "list" });
+        },
 
-    saveEffort() {
-        this.disabled = true
-        this.$store.state.efforts[parseInt(this.$route.params.idx)] = this.effort
-    }
+        editEffort() {
+            this.inputClass.classView = false; this.inputClass.classEdit = true;
+            this.disabled = false
+            this.beforeEditCache = JSON.parse(JSON.stringify(this.effort))
+        },
+
+        cancelEdit() {
+            this.inputClass.classView = true; this.inputClass.classEdit = false;
+            this.disabled = true
+            this.effort = this.beforeEditCache
+        },
+
+        saveEffort() {
+            this.inputClass.classView = true; this.inputClass.classEdit = false;
+            this.disabled = true
+            this.$store.dispatch('updateEffort', this.effort)
+        },
+
+        removeItem(id) {
+            const index = this.effort.items.findIndex(item => item.id == id)
+            this.effort.items.splice(index, 1)
+        },
+
+        defineItem(id) {
+            console.log(id)
+        }
   },
     
 }
@@ -239,6 +227,41 @@ export default {
 
 
 <style>
+
+.itemControl {
+    text-align: center;
+    cursor: pointer;
+    opacity: 0.5;
+}
+
+.itemControl:hover {
+    opacity: 1;
+}
+
+input:invalid {
+  border: 2px solid red;
+}
+
+.classView {
+    padding-left: 5px;
+    border: none;
+    background-color: transparent;
+    width: 100%;
+}
+
+.classEdit {
+    border: purple 0.5px solid;
+    background-color: white;
+    width: 100%;
+    padding-left: 5px;
+}
+
+/* .roadmapTable {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 50%;
+    padding: 10px;
+} */
 
 table {
     font-family: arial, sans-serif;
@@ -254,14 +277,14 @@ th {
 td, th {
     border: 1px solid #dddddd;
     text-align: left;
-    padding: 8px;
+    padding: 5px;
 }
 
 tr:nth-child(even) {
     background-color: #f8f9fa;
 }
 
-.title {
+title {
     margin: 16px;
 }
 
