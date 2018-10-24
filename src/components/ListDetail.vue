@@ -1,6 +1,13 @@
 
 <template>
     <div>
+        <b-modal ref="modalError" hide-footer size="mm" centered header-bg-variant="danger" header-text-variant="light" title="Validation">
+            <div class="d-block text-center">
+                <h3>The Effort Estimation form is <span style="color: red">incomplete</span></h3>
+            </div>
+            <!-- <b-btn class="mt-3" variant="outline-danger" block>Close Me</b-btn> -->
+        </b-modal>
+
         <div class="topNav">
             <span class="title">Effort Estimation ID: {{ $route.params.id }} <b-badge>{{ effort.status }}</b-badge></span>
             <div class="topNavRight">
@@ -23,27 +30,36 @@
         </div>
         <b-card bg-variant="light">
             <b-row>
-                <b-col sm="1"><label :for="'projectID'">Project ID:</label></b-col>
-                <b-col sm="2"><b-form-input :id="'projectID'" :disabled=this.disabled v-model="effort.projectId"></b-form-input></b-col>
+                <b-col sm="1">
+                    <label :for="'projectID'">Project ID:</label>
+                </b-col>
+                <b-col sm="2">
+                    <b-form-input 
+                        :id="'projectId'" 
+                        :disabled=disabled 
+                        v-model="effort.projectId" 
+                        :state="!$v.effort.projectId.required ? false : null"
+                        >
+                    </b-form-input>
+                </b-col>
 
                 <b-col sm="1"><label :for="'crmTicket'">CRM Ticket:</label></b-col>
-                <b-col sm="2"><b-form-input :id="'crmTicket'" :disabled=this.disabled v-model="effort.crmTicket"></b-form-input></b-col>
+                <b-col sm="2"><b-form-input :id="'crmTicket'" :disabled=this.disabled v-model="effort.crmTicket" :state="!$v.effort.crmTicket.required ? false : null"></b-form-input></b-col>
 
                 <b-col sm="1"><label :for="'dateTime'">Created on:</label></b-col>
-                <b-col sm="2"><b-form-input :id="'dateTime'" :disabled=this.disabled v-model="effort.createdOn"></b-form-input></b-col>
+                <b-col sm="2"><b-form-input :id="'dateTime'" :disabled=true v-model="effort.createdOn"></b-form-input></b-col>
             </b-row>
             <b-row>
                 <b-col sm="1"><label :for="'assessmentStakeholder'">Assessment Stakeholder:</label></b-col>
-                <b-col sm="2"><b-form-input :id="'assessmentStakeholder'" :disabled=this.disabled v-model="effort.assessmentStakeholder"></b-form-input></b-col>
+                <b-col sm="2"><b-form-input :id="'assessmentStakeholder'" :disabled=this.disabled v-model="effort.assessmentStakeholder" :state="!$v.effort.assessmentStakeholder.required ? false : null"></b-form-input></b-col>
 
                 <b-col sm="1"><label :for="'customer'">Customer:</label></b-col>
-                <b-col sm="2"><b-form-input :id="'customer'" :disabled=this.disabled v-model="effort.customer"></b-form-input></b-col>
+                <b-col sm="2"><b-form-input :id="'customer'" :disabled=this.disabled v-model="effort.customer" :state="!$v.effort.customer.required ? false : null"></b-form-input></b-col>
 
                 <b-col sm="1"><label :for="'account'">Account:</label></b-col>
-                <b-col sm="2"><b-form-input :id="'account'" :disabled=this.disabled v-model="effort.account"></b-form-input></b-col>
+                <b-col sm="2"><b-form-input :id="'account'" :disabled=this.disabled v-model="effort.account" :state="!$v.effort.account.required ? false : null"></b-form-input></b-col>
             </b-row>          
         </b-card>
-        <p>{{documentation}}</p>
         <br>
             <b-container fluid>
             <b-row><b-btn size="lg" variant="danger" class="btnAdd" @click="addActivity" :disabled=this.disabled>&plus;</b-btn></b-row>
@@ -53,28 +69,93 @@
                     <th>Activity</th>
                     <th>Description</th>
                     <th>Profile</th>
-                    <th >Role</th>
-                    <th style="width:100px">Level</th>
+                    <th>Role</th>
+                    <th>Level</th>
                     <th style="width:1px">Quantity</th>
                     <th style="width:1px">Execution</th>
-                    <th style="width:1px">Documentation</th>
-                    <th style="width:170px">Project Management</th>
+                    <th style="width:1px">Document.</th>
+                    <th style="width:1px">Proj.Mng.</th>
                     <th v-if="!disabled" style="text-align: center;"><img src="../assets/menu.png"></th>
                 </tr>
 
-                    <tr v-for="item in effort.items" :key="item.id">
-                        <td>{{item.id}}</td>
-                        <td><input :disabled=disabled v-model="item.activity" v-bind:class="inputClass"></td>
-                        <td><input :disabled=disabled v-model="item.description" v-bind:class="inputClass"></td>
-                        <td><select :disabled=disabled v-bind:class="inputClass"><optgroup><option>{{item.profile}}</option></optgroup></select></td>
-                        <td><input :disabled=disabled v-model="item.role" v-bind:class="inputClass"></td>
-                        <td><input :disabled=disabled v-model="item.level" v-bind:class="inputClass"></td>
-                        <td><input :disabled=disabled v-model="item.quantity" v-bind:class="inputClass" @change="defineItem(item.id)"></td>
-                        <td><input :disabled=disabled v-model="item.execution" v-bind:class="inputClass" @change="defineItem(item.id)"></td>
-                        <td><input :disabled=disabled v-model="item.documentation" class="classView"></td>
-                        <td><input :disabled=disabled v-model="item.projectManagement" class="classView"></td>    
-                        <td v-if="!disabled" class="itemControl" ><img src="../assets/garbage.png" @click="removeItem(item.id)"></td>    
-                    </tr>
+                    <tr v-for="(v, index) in $v.effort.items.$each.$iter" :key="index">
+                        <td style="text-align:center">{{v.id.$model}}</td>
+                        <td>
+                            <input v-if="!v.activity.$invalid" :disabled=disabled v-model.trim="v.activity.$model" v-bind:class="inputClass" type="text">
+                            <input v-else :disabled=disabled v-model.trim="v.activity.$model" class="inputErrorClass" type="text">
+                        </td>
+                        <td>
+                            <input v-if="!v.description.$invalid" :disabled=disabled v-model.trim="v.description.$model" v-bind:class="inputClass" type="text">
+                            <input v-else :disabled=disabled v-model.trim="v.description.$model" class="inputErrorClass" type="text">
+                        </td>
+                        <td>
+                            <select v-if="!v.profile.$invalid" :disabled=disabled v-bind:class="inputClass" v-model.trim="v.profile.$model">
+                                <option :value="profile.key" v-for="profile in $store.state.profiles" :key="profile.key" :selected="profile.key === v.profile.$model" >{{ profile.value }}</option>
+                            </select>
+                            <select v-else :disabled=disabled  class="inputErrorClass" v-model.trim="v.profile.$model">
+                                <option :value="profile.key" v-for="profile in $store.state.profiles" :key="profile.key" :selected="profile.key === v.profile.$model" >{{ profile.value }}</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select v-if="!v.role.$invalid" :disabled=disabled v-bind:class="inputClass" v-model.trim="v.role.$model">
+                                <option :value="role.key" v-for="role in filteredRoles(v.profile.$model)" :key="role.key" >
+                                    {{ role.value }}</option>
+                            </select>
+                            <select v-else :disabled=disabled class="inputErrorClass" v-model.trim="v.role.$model">
+                                <option :value="role.key" v-for="role in filteredRoles(v.profile.$model)" :key="role.key" >
+                                    {{ role.value }}</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select v-if="!v.level.$invalid" :disabled=disabled v-bind:class="inputClass" v-model.trim="v.level.$model" >
+                                <option :value="level.key" v-for="level in $store.state.levels" :key="level.key" >{{ level.value }}</option>
+                            </select>
+                            <select v-else :disabled=disabled class="inputErrorClass" v-model.trim="v.level.$model" >
+                                <option :value="level.key" v-for="level in $store.state.levels" :key="level.key" >{{ level.value }}</option>
+                            </select>
+                        </td>
+                        <td>
+                            <input v-if="!v.quantity.$invalid" :disabled=disabled 
+                                   v-model.trim="v.quantity.$model" 
+                                   v-bind:class="inputClass" 
+                                   @keyup="sumItem(v.id.$model)" 
+                                   @change="sumItem(v.id.$model)" 
+                                   class="inputTime"
+                                   type="number">
+                            <input v-else :disabled=disabled 
+                                   v-model.trim="v.quantity.$model" 
+                                   v-bind:class="inputClass" 
+                                   @keyup="sumItem(v.id.$model)" 
+                                   @change="sumItem(v.id.$model)" 
+                                   class="inputTime inputErrorClass"
+                                   type="number">
+                        </td>
+                        <td>
+                            <input v-if="!v.execution.$invalid" :disabled=disabled 
+                                   v-model.trim="v.execution.$model" 
+                                   v-bind:class="inputClass" 
+                                   @keyup="sumItem(v.id.$model)" 
+                                   @change="sumItem(v.id.$model)" 
+                                   class="inputTime"
+                                   type="number">
+                            <input v-else :disabled=disabled 
+                                   v-model.trim="v.execution.$model" 
+                                   v-bind:class="inputClass" 
+                                   @keyup="sumItem(v.id.$model)" 
+                                   @change="sumItem(v.id.$model)" 
+                                   class="inputTime inputErrorClass"
+                                   type="number">
+                        </td>
+                        <td>
+                            <input disabled 
+                                   v-model.trim="v.documentation.$model" 
+                                   class="classView inputTime" ></td>
+                        <td>
+                            <input disabled 
+                                   v-model.trim="v.projectManagement.$model" 
+                                   class="classView inputTime"></td>    
+                        <td v-if="!disabled" class="itemControl" ><img src="../assets/garbage.png" @click="removeItem(v.id.$model)"></td>
+                    </tr>                    
             </table>
             </b-container>
             
@@ -84,22 +165,22 @@
             <table class="roadmapTable">
                 <tr>
                     <th style="width:300px">Phase</th>
-                    <th>Architecture <b-badge>{{ sumArchitecture }}</b-badge></th>
-                    <th>Functional <b-badge>{{ sumFunctional }}</b-badge></th>
-                    <th>Integration <b-badge>{{ sumIntegration }}</b-badge></th>
-                    <th>Development <b-badge>{{ sumDevelopment }}</b-badge></th>
-                    <th>Project Management <b-badge>{{ sumProjectManagement }}</b-badge></th>
-                    <th>Documentation <b-badge>{{ sumDocumentation }}</b-badge></th>
+                    <th style="text-align:center">Architecture <b-badge>{{ sumArchitecture }}</b-badge></th>
+                    <th style="text-align:center">Functional <b-badge>{{ sumFunctional }}</b-badge></th>
+                    <th style="text-align:center">Integration <b-badge>{{ sumIntegration }}</b-badge></th>
+                    <th style="text-align:center">Development <b-badge>{{ sumDevelopment }}</b-badge></th>
+                    <th style="text-align:center">Project Management <b-badge>{{ sumProjectManagement }}</b-badge></th>
+                    <th style="text-align:center">Documentation <b-badge>{{ sumDocumentation }}</b-badge></th>
                 </tr>
 
                     <tr v-for="item in effort.roadmap" :key="item.phase">
                         <td>{{item.phase}}</td>
-                        <td><input :disabled=disabled v-model="item.architecture" v-bind:class="inputClass" type="number"></td>
-                        <td><input :disabled=disabled v-model="item.functional" v-bind:class="inputClass"></td>
-                        <td><input :disabled=disabled v-model="item.integration" v-bind:class="inputClass"></td>
-                        <td><input :disabled=disabled v-model="item.development" v-bind:class="inputClass"></td>
-                        <td><input :disabled=disabled v-model="item.projectmanagement" v-bind:class="inputClass"></td>
-                        <td><input :disabled=disabled v-model="item.documentation" v-bind:class="inputClass"></td>
+                        <td><input :disabled=disabled v-model="item.architecture" v-bind:class="inputClass" type="number" class="inputTime"></td>
+                        <td><input :disabled=disabled v-model="item.functional" v-bind:class="inputClass" type="number" class="inputTime"></td>
+                        <td><input :disabled=disabled v-model="item.integration" v-bind:class="inputClass" type="number" class="inputTime"></td>
+                        <td><input :disabled=disabled v-model="item.development" v-bind:class="inputClass" type="number" class="inputTime"></td>
+                        <td><input :disabled=disabled v-model="item.projectmanagement" v-bind:class="inputClass" type="number" class="inputTime"></td>
+                        <td><input :disabled=disabled v-model="item.documentation" v-bind:class="inputClass" type="number" class="inputTime"></td>
                     </tr>
             </table>
             </b-container>            
@@ -107,23 +188,78 @@
 </template>
 
 <script>
+import { required, minLength, between } from 'vuelidate/lib/validators'
 
 export default {
     name: 'list-detail',
     data () {
         return {
-            inputClass:{ 'classView': true, 'classEdit':false },
+            inputClass:{ 'classView':true, 'classEdit':false },
             disabled: true,
             effort: JSON.parse(JSON.stringify(this.$store.state.efforts[this.$route.params.idx])),
             beforeEditCache: Object,
-    }
-  },
+        }
+    },
+
+    validations: {
+        effort: {
+            projectId: {
+                required
+            },
+            // scope: {
+            //     required
+            // },
+            crmTicket: {
+                required
+            },
+            assessmentStakeholder: {
+                required
+            },
+            customer: {
+                required
+            },
+            account: {
+                required
+            },
+
+            items: {
+                $each: {
+                    id: {
+                        required
+                    },
+                    activity: {
+                        required
+                    },
+                    description: {
+                        required
+                    },
+                    profile: {
+                        required
+                    },
+                    role: {
+                        required
+                    },
+                    level: {
+                        required
+                    },
+                    quantity: {
+                        required,
+                    },
+                    execution: {
+                        required
+                    },
+                    documentation: {
+                        required
+                    },
+                    projectManagement: {
+                        required
+                    },
+                }
+            }
+        }
+    },
 
     computed: {
-        documentation: function () {
-
-        },
-
         sumArchitecture: function () {
             return this.sum('Architecture')
         },
@@ -144,17 +280,36 @@ export default {
         },
     },
 
-
     methods: {
-        sum(term) {
+        filteredRoles(profile) {
+            if (profile) {
+                return this.$store.state.roles.filter(function(item) {
+                    return item.parent == profile
+                })
+            } 
+        },
 
+        sum(term) {
             let sum = 0
             let allocated = 0
-            var value = 0
+            var field = 0
+            var key, value
 
             let items = this.effort.items
+            
+            for (const key1 in this.$store.state.profiles) {
+                const element = this.$store.state.profiles[key1]
+                
+                if (element.value == term) {
+                    key = element.key
+                    value = element.value.toLowerCase()
+                    break
+                }
+            }
+
             for (const key1 in items) {
                 const element = items[key1];
+
                 if (term == 'documentation') {
                     sum = sum + element.documentation
                 }
@@ -162,17 +317,27 @@ export default {
                 if (term == 'projectmanagement') {
                     sum = sum + element.projectManagement
                 }
-
-                if (element.profile == term) {
+                
+                if (element.profile == key) {
                     sum = sum + (element.execution * element.quantity)
                 }
             }
-
+            
             for (var key1 in this.effort.roadmap) {
                 let roadmap = this.effort.roadmap[key1]
 
-                value = parseInt(roadmap[term.toLowerCase()])
-                allocated = allocated + value
+                if ( term == 'documentation' ) {
+                    allocated = allocated + parseInt(roadmap.documentation)
+                    break
+                }
+
+                if ( term == 'projectmanagement' ) {
+                    allocated = allocated + parseInt(roadmap.projectmanagement)
+                    break
+                }                
+
+                field = parseInt(roadmap[value])
+                allocated = allocated + field
             }
 
             return sum - allocated
@@ -187,7 +352,7 @@ export default {
             }
 
             pk = parseInt(pk) + 1
-            this.effort.items.push({id:pk})
+            this.effort.items.push({id:pk,quantity:0,execution:0,documentation:0,projectManagement:0,profile:1})
         },
 
         backToList() {
@@ -195,21 +360,31 @@ export default {
         },
 
         editEffort() {
-            this.inputClass.classView = false; this.inputClass.classEdit = true;
+            this.inputClass.classView = false; 
+            this.inputClass.classEdit = true;
             this.disabled = false
             this.beforeEditCache = JSON.parse(JSON.stringify(this.effort))
         },
 
         cancelEdit() {
-            this.inputClass.classView = true; this.inputClass.classEdit = false;
+            this.inputClass.classView = true; 
+            this.inputClass.classEdit = false;
             this.disabled = true
             this.effort = this.beforeEditCache
         },
 
         saveEffort() {
-            this.inputClass.classView = true; this.inputClass.classEdit = false;
-            this.disabled = true
-            this.$store.dispatch('updateEffort', this.effort)
+            if(this.$v.effort.$invalid) {
+                this.$v.effort.$reset
+                this.$refs.modalError.show()
+            } else {
+                this.$v.effort.$reset
+                this.inputClass.classView = true; 
+                this.inputClass.classEdit = false;
+                this.disabled = true
+                this.$store.dispatch('updateEffort', this.effort)
+            }
+
         },
 
         removeItem(id) {
@@ -217,9 +392,11 @@ export default {
             this.effort.items.splice(index, 1)
         },
 
-        defineItem(id) {
-            console.log(id)
-        }
+        sumItem(id) {
+            const index = this.effort.items.findIndex(item => item.id == id)
+            this.effort.items[index].documentation = parseInt((this.effort.items[index].quantity * this.effort.items[index].execution) * 0.20)
+            this.effort.items[index].projectManagement = parseInt((this.effort.items[index].quantity * this.effort.items[index].execution) * 0.100)
+        },
   },
     
 }
@@ -227,6 +404,19 @@ export default {
 
 
 <style>
+
+.inputErrorClass {
+    border: red 1px solid;
+    background-color: white;
+    width: 100%;
+    padding-left: 3px;
+    outline: none;
+    box-shadow: 0px 0px 1px red;
+}
+
+.inputTime {    
+    text-align: center;
+}
 
 .itemControl {
     text-align: center;
@@ -238,10 +428,6 @@ export default {
     opacity: 1;
 }
 
-input:invalid {
-  border: 2px solid red;
-}
-
 .classView {
     padding-left: 5px;
     border: none;
@@ -250,18 +436,12 @@ input:invalid {
 }
 
 .classEdit {
-    border: purple 0.5px solid;
+    border: lightgray 0.1px solid;
     background-color: white;
     width: 100%;
-    padding-left: 5px;
+    padding-left: 3px;
+    
 }
-
-/* .roadmapTable {
-    font-family: arial, sans-serif;
-    border-collapse: collapse;
-    width: 50%;
-    padding: 10px;
-} */
 
 table {
     font-family: arial, sans-serif;
@@ -277,7 +457,7 @@ th {
 td, th {
     border: 1px solid #dddddd;
     text-align: left;
-    padding: 5px;
+    padding: 2px;
 }
 
 tr:nth-child(even) {
