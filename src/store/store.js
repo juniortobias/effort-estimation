@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import axios from 'axios';
 
-axios.defaults.baseURL = 'https://j92o4nqpeb.execute-api.us-east-1.amazonaws.com/dev'
+axios.defaults.baseURL = 'https://p6crfk07oj.execute-api.sa-east-1.amazonaws.com/dev'
 
 Vue.use(Vuex)
 
@@ -13,7 +13,8 @@ export const store = new Vuex.Store({
     }
   },
     state: {
-        token: localStorage.getItem('access_token') || null,
+            token: localStorage.getItem('access_token') || null,
+            id: '',
             profiles: [
                 { key:1, value:'Architecture' },
                 { key:2, value:'Functional' },
@@ -43,183 +44,81 @@ export const store = new Vuex.Store({
                 { key:4, value:'High'  },
                 { key:5, value:'Very High'  }
             ],
-            efforts: [
-                { 
-                    id: 1, 
-                    projectId: 'SFSCO-6',
-                    projectScope: 'Desenho de solução',
-                    userid: 'odenir.tobias.ext@tivit.com',
-                    createdOn: '2018-08-29T15:28:23-03:00',
-                    account: '0040002900-03',
-                    crmTicket: 'TVT-225544',
-                    assessmentStakeholder: 'Tobias Junior',
-                    customer: 'Tenda Atacado',
-                    status: 'Saved',
-                    items: [
-                        {
-                            id: 1,
-                            activity: 'Levantamento de Requisitos',
-                            description: 'Definição de escopo',
-                            profile: 1,
-                            role: 1,
-                            level: 1,
-                            quantity: 1,
-                            execution: 32,
-                            documentation: 8,
-                            projectManagement: 8,
-                            tests: 2,
-                        },
-                        {
-                            id: 2,
-                            activity: 'Especificação Funcional',
-                            description: 'Definição de escopo',
-                            profile: 2,
-                            role: 2,
-                            documentation: 8,
-                            execution: 16,
-                            level: 2,
-                            quantity: 1,                        
-                            projectManagement: 8,
-                            tests: 2,
-                        },
-                        {
-                            id: 3,
-                            activity: 'Especificação Funcional',
-                            description: 'Definição de escopo',
-                            profile: 1,
-                            role: 1,
-                            documentation: 8,
-                            execution: 24,
-                            level: 3,
-                            quantity: 1,                        
-                            projectManagement: 8,
-                            tests: 2,
-                        },
-                    ],
-                    roadmap: [
-                        {
-                            'phase':'Project Preparation',
-                            'architecture': '0',
-                            'functional': '0',
-                            'integration': '0',
-                            'development': '0',
-                            'projectmanagement':'0',
-                            'documentation':'0'
-                        },
-                        {
-                            'phase':'Business Blueprint',
-                            'architecture': '0',
-                            'functional': '0',
-                            'integration': '0',
-                            'development': '0',
-                            'projectmanagement':'0',
-                            'documentation':'0'
-                        }, 
-                        {
-                            'phase':'Realization',
-                            'architecture': '0',
-                            'functional': '0',
-                            'integration': '0',
-                            'development': '0',
-                            'projectmanagement':'0',
-                            'documentation':'0'
-                        },
-                        {
-                            'phase':'Final Preparation',
-                            'architecture': '0',
-                            'functional': '0',
-                            'integration': '0',
-                            'development': '0',
-                            'projectmanagement':'0',
-                            'documentation':'1'
-                        }, 
-                        {
-                            'phase':'Go-Live',
-                            'architecture': '0',
-                            'functional': '0',
-                            'integration': '0',
-                            'development': '0',
-                            'projectmanagement':'0',
-                            'documentation':'0'
-                        }, 
-                    ]
-                },
-                { 
-                    id: 2, 
-                    projectId: 'SFSCO-610',
-                    projectScope: 'Implantação do Ariba',
-                    userid: 'murilo.pedrico.ext',
-                    createdOn: '2018-03-01T09:15:58-03:00',
-                    account: '0040363900-05',
-                    crmTicket: 'TVT-552233',
-                    assessmentStakeholder: 'Murilo Pedrico',
-                    customer: 'Sicred',
-                    status: 'Released',
-                    items: [
-                        {
-                            id: 1,
-                            activity: 'Levantamento de Requisitos',
-                            description: 'Definição de escopo',
-                            profile: 1,
-                            role: 1,
-                            level: 4,
-                            quantity: 1,
-                            execution: 8,
-                            documentation: 8,
-                            projectManagement: 8,
-                            tests: 2,
-                        },
-                    ],
-                    roadmap: [
-                        {
-                            'phase':'Project Preparation',
-                            'architecture': '0',
-                            'functional': '0',
-                            'integration': '0',
-                            'development': '0',
-                            'projectmanagement':'0',
-                            'documentation':'0'
-                        },
-                        {
-                            'phase':'Business Blueprint',
-                            'architecture': '0',
-                            'functional': '0',
-                            'integration': '0',
-                            'development': '0',
-                            'projectmanagement':'0',
-                            'documentation':'0'
-                        }, 
-                        {
-                            'phase':'Realization',
-                            'architecture': '0',
-                            'functional': '0',
-                            'integration': '0',
-                            'development': '0',
-                            'projectmanagement':'0',
-                            'documentation':'0'
-                        },
-                        {
-                            'phase':'Final Preparation',
-                            'architecture': '0',
-                            'functional': '0',
-                            'integration': '0',
-                            'development': '0',
-                            'projectmanagement':'0',
-                            'documentation':'0'
-                        }, 
-                        {
-                            'phase':'Go-Live',
-                            'architecture': '0',
-                            'functional': '0',
-                            'integration': '0',
-                            'development': '0',
-                            'projectmanagement':'0',
-                            'documentation':'0'
-                        }, 
-                    ]
-                },                
-            ]
-        
+            effort: { 
+                        id: '', 
+                        projectId: '',
+                        projectScope: '',
+                        userid: '',
+                        createdOn: '',
+                        account: '',
+                        crmTicket: '',
+                        assessmentStakeholder: '',
+                        customer: '',
+                        status: '',
+                        items: [
+                            {
+                                id: 1,
+                                activity: '',
+                                description: '',
+                                profile: '',
+                                role: '',
+                                level: '',
+                                quantity: 0,
+                                execution: 0,
+                                documentation: 0,
+                                projectManagement: 0,
+                                tests: 0,
+                            },
+                        ],
+                        roadmap: [
+                            {
+                                'phase':'Project Preparation',
+                                'architecture': 0,
+                                'functional': 0,
+                                'integration': 0,
+                                'development': 0,
+                                'projectmanagement':0,
+                                'documentation':0
+                            },
+                            {
+                                'phase':'Business Blueprint',
+                                'architecture': 0,
+                                'functional': 0,
+                                'integration': 0,
+                                'development': 0,
+                                'projectmanagement':0,
+                                'documentation':0
+                            }, 
+                            {
+                                'phase':'Realization',
+                                'architecture': 0,
+                                'functional': 0,
+                                'integration': 0,
+                                'development': 0,
+                                'projectmanagement':0,
+                                'documentation':0
+                            },
+                            {
+                                'phase':'Final Preparation',
+                                'architecture': 0,
+                                'functional': 0,
+                                'integration': 0,
+                                'development': 0,
+                                'projectmanagement':0,
+                                'documentation':0
+                            }, 
+                            {
+                                'phase':'Go-Live',
+                                'architecture': 0,
+                                'functional': 0,
+                                'integration': 0,
+                                'development': 0,
+                                'projectmanagement':0,
+                                'documentation':0
+                            }, 
+                        ]
+                    },
+            efforts: ''
     },
 
     getters: {
@@ -237,23 +136,120 @@ export const store = new Vuex.Store({
             state.token = null
         },
 
-        saveEffort(state, effort) {
-            state.efforts.push(effort)
-        },
-
-        updateEffort(state, effort) {
-            const index = state.efforts.findIndex(item => item.id == effort.id)
-            state.efforts.splice(index, 1, effort)
-        }
     },
 
     actions: {
+        createEffort(context, router) {
+            axios.get('/getlastid')
+                .then(response => { 
+                const id = response.data
+                let newEffort = JSON.parse(JSON.stringify(this.state.effort))
+                newEffort.id = id + 1
+                this.state.effort = JSON.parse(JSON.stringify(newEffort))
+                router.push({name:'list-detail', params: {id: newEffort.id}, hash:'N' })
+                })
+                .catch(error => {
+                    console.log(error)
+                })
+        },
+
+        getEfforts(context) {
+            axios.post('/efforts', {
+                data: {
+                    operation: 'list',
+                    tableName: 'effortEstimation-efforts',
+                    payload: {
+                        TableName: 'effortEstimation-efforts'
+                    }
+                }
+            })
+            .then(response => {
+                this.state.efforts = response.data.Items
+            })
+            .catch(error => {
+                console.log(error)
+            })
+        },
+
+        getEffort(context, id) {
+            return new Promise ((resolve, reject) => {
+                axios.post('/efforts', {
+                    data: {
+                        operation: 'read',
+                        tableName: 'effortEstimation-efforts',
+                        payload: {
+                            Key: {
+                                id: id
+                            }
+                        }
+                    }
+                }).then(response => {
+                    resolve(response);
+                }, error => {
+                    reject(error);
+                })
+
+            })
+        },
+
+        deleteEffort(context, id) {
+            return new Promise ((resolve, reject) => {
+                axios.post('/efforts', {
+                    data: {
+                        operation: 'delete',
+                        tableName: 'effortEstimation-efforts',
+                        payload: {
+                            Key: {
+                                id: id
+                            }
+                        }
+                    }
+                }).then(response => {
+                    resolve(response);
+                }, error => {
+                    reject(error);
+                })
+
+            })
+        },
+
         saveEffort(context, effort) {
-            context.commit('saveEffort',effort)
+            effort.id = effort.id.toString()
+            return new Promise ((resolve, reject) => {
+                axios.post('/efforts', {
+                    data: {
+                        operation: 'create',
+                        tableName: 'effortEstimation-efforts',
+                        payload: {
+                            Item:effort
+                        }
+                    }
+                }).then(response => {
+                    resolve(response);
+                }, error => {
+                    reject(error);
+                })
+
+            })
         },
 
         updateEffort(context, effort) {
-            context.commit('updateEffort',effort)
+            return new Promise ((resolve, reject) => {
+                axios.post('/efforts', {
+                    data: {
+                        operation: 'create',
+                        tableName: 'effortEstimation-efforts',
+                        payload: {
+                            Item:effort
+                        }
+                    }
+                }).then(response => {
+                    resolve(response);
+                }, error => {
+                    reject(error);
+                })
+
+            })
         },
 
         destroyToken(context) {
@@ -278,5 +274,5 @@ export const store = new Vuex.Store({
                 })
             })
         },
-    }
+    },
 })

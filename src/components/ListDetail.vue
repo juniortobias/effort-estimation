@@ -5,16 +5,15 @@
             <div class="d-block text-center">
                 <h3>The Effort Estimation form is <span style="color: red">incomplete</span></h3>
             </div>
-            <!-- <b-btn class="mt-3" variant="outline-danger" block>Close Me</b-btn> -->
         </b-modal>
 
         <div class="topNav">
-            <span class="title">Effort Estimation ID: {{ $route.params.id }} <b-badge>{{ effort.status }}</b-badge></span>
+            <span class="title">Effort Estimation ID: {{ effort.id }} <b-badge>{{ effort.status }}</b-badge></span>
             <div class="topNavRight">
                 <b-btn @click="backToList" variant="secondary">Back</b-btn>
                 <b-button-group>
                     <b-btn @click="editEffort" :disabled=!this.disabled>Edit</b-btn>
-                    <b-btn variant="danger">Delete</b-btn>
+                    <b-btn @click="deleteEffort" :disabled=!this.disabled variant="danger">Delete</b-btn>
                     <b-btn @click="saveEffort" variant="" :disabled=this.disabled>Save</b-btn>
                     <b-btn @click="cancelEdit" variant="" :disabled=this.disabled>Cancel</b-btn>                    
                 </b-button-group>
@@ -58,7 +57,12 @@
 
                 <b-col sm="1"><label :for="'account'">Account:</label></b-col>
                 <b-col sm="2"><b-form-input :id="'account'" :disabled=this.disabled v-model="effort.account" :state="!$v.effort.account.required ? false : null"></b-form-input></b-col>
-            </b-row>          
+            </b-row>
+            <br>
+            <b-row>
+                <b-col sm="1" style="margin-top:1px;"><label :for="'projectScope'">Project Scope:</label></b-col>
+                <b-col sm="8"><b-form-textarea :id="'projectScope'" :rows="5" :disabled=this.disabled v-model="effort.projectScope" :state="!$v.effort.projectScope.required ? false : null"></b-form-textarea></b-col>
+            </b-row>     
         </b-card>
         <br>
             <b-container fluid>
@@ -196,7 +200,7 @@ export default {
         return {
             inputClass:{ 'classView':true, 'classEdit':false },
             disabled: true,
-            effort: JSON.parse(JSON.stringify(this.$store.state.efforts[this.$route.params.idx])),
+            effort: Object,
             beforeEditCache: Object,
         }
     },
@@ -206,9 +210,9 @@ export default {
             projectId: {
                 required
             },
-            // scope: {
-            //     required
-            // },
+            projectScope: {
+                required
+            },
             crmTicket: {
                 required
             },
@@ -243,10 +247,10 @@ export default {
                         required
                     },
                     quantity: {
-                        required,
+                        required, between: between(1, 99999)
                     },
                     execution: {
-                        required
+                        required, between: between(1, 99999)
                     },
                     documentation: {
                         required
@@ -278,6 +282,21 @@ export default {
         sumDocumentation: function () {
             return this.sum('documentation')
         },
+    },
+
+    created() {
+        if ( this.$route.hash == 'N' ) {
+            this.effort = JSON.parse(JSON.stringify(this.$store.state.effort))
+            this.disabled = false
+            var currentdate = new Date(); 
+            this.effort.createdOn = currentdate.toLocaleString()
+        } else {
+            this.$store.dispatch('getEffort',this.$route.params.id).then(response => {
+                this.effort = response.data.Item
+            }, error => {
+                console.error('Got nothing from server')
+            })
+        }
     },
 
     methods: {
@@ -351,12 +370,23 @@ export default {
                 pk = element.id
             }
 
-            pk = parseInt(pk) + 1
-            this.effort.items.push({id:pk,quantity:0,execution:0,documentation:0,projectManagement:0,profile:1})
+            if (pk) {
+                pk = parseInt(pk) + 1
+            } else {
+                pk = 1
+            }
+            
+            
+            this.effort.items.push({id:pk, activity:'', description:'', profile:'', role:'', level:'', quantity:0, execution:0, documentation:0, projectManagement:0, })
         },
 
         backToList() {
             this.$router.push({ name: "list" });
+        },
+
+        deleteEffort() {
+             this.$store.dispatch('deleteEffort', this.$route.params.id).then(response => {
+                 this.$router.push({ name: "list" })})
         },
 
         editEffort() {
@@ -367,10 +397,14 @@ export default {
         },
 
         cancelEdit() {
-            this.inputClass.classView = true; 
-            this.inputClass.classEdit = false;
-            this.disabled = true
-            this.effort = this.beforeEditCache
+            if ( this.$route.hash != 'N' ) {
+                this.inputClass.classView = true; 
+                this.inputClass.classEdit = false;
+                this.disabled = true
+                this.effort = this.beforeEditCache
+            } else {
+                this.$router.push({ name: "list" })
+            }
         },
 
         saveEffort() {
@@ -382,7 +416,22 @@ export default {
                 this.inputClass.classView = true; 
                 this.inputClass.classEdit = false;
                 this.disabled = true
-                this.$store.dispatch('updateEffort', this.effort)
+                if ( this.$route.hash != 'N' ) {
+                    this.$store.dispatch('updateEffort', this.effort).then(response => {
+                        this.$store.dispatch('getEffort',this.$route.params.id).then(response => {
+                            this.effort = response.data.Item
+                        }, error => {
+                            console.error('Got nothing from server')
+                        })
+                    })
+                } else {
+                    this.effort.status = 'Saved'
+                    this.effort.userid = 'odenir.tobias.ext'
+                    this.$store.dispatch('saveEffort', this.effort).then(response => {
+                        this.$router.push({ name: "list" })
+                    })
+                }
+
             }
 
         },

@@ -1,8 +1,8 @@
 
 <template>
-<b-container fluid>
+<!-- <b-container fluid>
     <div class="title"><h2>Effort Estimation Management</h2></div>
-    <b-row><b-btn size="lg" variant="danger" class="btnAdd">&plus;</b-btn></b-row>
+    <b-row><b-btn size="lg" variant="danger" class="btnAdd" @click="createEffort">&plus;</b-btn></b-row>
     <b-table id="my-table" hover responsive :items="$store.state.efforts" @row-clicked="rowClicked">
         <template slot="HEAD_items" slot-scope="data"></template>
         <template slot="HEAD_roadmap" slot-scope="data"></template>
@@ -12,7 +12,38 @@
             <b-badge variant="dark">{{ data.item.status }}</b-badge>
         </template>  
     </b-table>
-</b-container>
+</b-container> -->
+<b-container fluid>
+    <div class="title"><h2>Effort Estimation Management</h2></div>
+    <b-row><b-btn size="lg" variant="danger" class="btnAdd" @click="createEffort">&plus;</b-btn></b-row>
+    <table class="Efforts">
+        <tr>
+            <th>ID</th>
+            <th>Project ID</th>
+            <th>Project Scope</th>
+            <th>Customer</th>
+            <th>Account</th>
+            <th>CRM Ticket</th>
+            <th>Assessment Stakeholder</th>
+            <th>Created by</th>
+            <th>Created on</th>
+            <th style="text-align:center">Status</th>
+        </tr>
+
+        <tr v-for="item in $store.state.efforts" :key="item.id" @click="rowClicked(item.id)">
+            <td>{{parseInt(item.id)}}</td>
+            <td>{{item.projectId}}</td>
+            <td>{{item.projectScope.substring(0,100)}}</td>
+            <td>{{item.customer}}</td>
+            <td>{{item.account}}</td>
+            <td>{{item.crmTicket}}</td>
+            <td>{{item.assessmentStakeholder}}</td>
+            <td>{{item.userid}}</td>
+            <td>{{item.createdOn}}</td>
+            <td style="text-align:center"><b-badge variant="dark">{{ item.status }}</b-badge></td>
+        </tr>
+    </table>
+    </b-container>  
 
 </template>
 
@@ -26,15 +57,24 @@ export default {
         }
     },
     methods:{
-      rowClicked(record, index) {
-          this.$router.push({name:'list-detail', params: {id: record.id, idx: index} })
+      rowClicked(id) {
+          console.log(id)
+          this.$router.push({name:'list-detail', params: {id: id} })
+      },
+
+      createEffort() {
+        this.$store.dispatch('createEffort', this.$router)
       }
   },
+
+  created() {
+      this.$store.dispatch('getEfforts')
+  }
 }
 </script>
 
 
-<style>
+<style scoped>
 .title {
     font-family: 'Avenir', Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -55,10 +95,35 @@ export default {
     margin-left: auto;
 }
 
-.table td {
-    cursor: pointer;
-
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
 }
 
+th {
+    background-color: #e9ecef
+}
+
+table tr:hover {
+    background-color: rgb(240, 240, 240);
+}
+
+td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 10px;
+    cursor: pointer;
+}
+
+tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.table thead {
+    background-color:#f8f9fa;
+}
 
 </style>
