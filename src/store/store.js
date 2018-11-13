@@ -15,28 +15,8 @@ export const store = new Vuex.Store({
     state: {
             token: localStorage.getItem('access_token') || null,
             id: '',
-            profiles: [
-                { key:1, value:'Architecture' },
-                { key:2, value:'Functional' },
-                { key:3, value:'Integration'  },
-                { key:4, value:'Development'  }
-            ],
-            roles: [
-                { key:1, value:'Solutions Architect', parent:1  },
-                { key:2, value:'Sales and Distribuition (SD)', parent:2  },
-                { key:3, value:'Material Management (MM)', parent:2  },
-                { key:4, value:'Financials (FI)', parent:2  },
-                { key:5, value:'Production Planning (PP)', parent:2  },
-                { key:6, value:'Human Resources (HR)', parent:2  },
-                { key:7, value:'Controlling (CO)', parent:2  },
-                { key:8, value:'Plant Maintenance (PM)', parent:2  },
-                { key:9, value:'Project System (PS)', parent:2  },
-                { key:10, value:'ABAP Developer', parent:4  },
-                { key:11, value:'SAPUI5/Fiori Developer', parent:4  },
-                { key:12, value:'Process Orchestration', parent:3  },
-                { key:13, value:'Enterprise Service Bus', parent:3  },
-
-            ],
+            profiles: '',
+            roles: '',
             levels: [
                 { key:1, value:'Very Low' },
                 { key:2, value:'Low' },
@@ -139,6 +119,44 @@ export const store = new Vuex.Store({
     },
 
     actions: {
+        getProfiles(context){
+            return new Promise ((resolve, reject) => {
+                axios.post('/efforts', {
+                    data: {
+                        operation: 'list',
+                        tableName: 'effortEstimation-profiles',
+                        payload: {
+                            TableName: 'effortEstimation-profiles'
+                        }
+                    }
+                }).then(response => {
+                    resolve(response);
+                }, error => {
+                    reject(error);
+                })
+
+            })
+        },
+
+        getRoles(context){
+            return new Promise ((resolve, reject) => {
+                axios.post('/efforts', {
+                    data: {
+                        operation: 'list',
+                        tableName: 'effortEstimation-roles',
+                        payload: {
+                            TableName: 'effortEstimation-roles'
+                        }
+                    }
+                }).then(response => {
+                    resolve(response);
+                }, error => {
+                    reject(error);
+                })
+
+            })
+        },
+
         createEffort(context, router) {
             axios.get('/getlastid')
                 .then(response => { 

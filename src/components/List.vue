@@ -1,50 +1,38 @@
 
 <template>
-<!-- <b-container fluid>
-    <div class="title"><h2>Effort Estimation Management</h2></div>
-    <b-row><b-btn size="lg" variant="danger" class="btnAdd" @click="createEffort">&plus;</b-btn></b-row>
-    <b-table id="my-table" hover responsive :items="$store.state.efforts" @row-clicked="rowClicked">
-        <template slot="HEAD_items" slot-scope="data"></template>
-        <template slot="HEAD_roadmap" slot-scope="data"></template>
-        <template slot="items" slot-scope="data"></template>
-        <template slot="roadmap" slot-scope="data"></template>
-        <template slot="status" slot-scope="data">
-            <b-badge variant="dark">{{ data.item.status }}</b-badge>
-        </template>  
-    </b-table>
-</b-container> -->
-<b-container fluid>
-    <div class="title"><h2>Effort Estimation Management</h2></div>
-    <b-row><b-btn size="lg" variant="danger" class="btnAdd" @click="createEffort">&plus;</b-btn></b-row>
-    <table class="Efforts">
-        <tr>
-            <th>ID</th>
-            <th>Project ID</th>
-            <th>Project Scope</th>
-            <th>Customer</th>
-            <th>Account</th>
-            <th>CRM Ticket</th>
-            <th>Assessment Stakeholder</th>
-            <th>Created by</th>
-            <th>Created on</th>
-            <th style="text-align:center">Status</th>
-        </tr>
+    <div style="margin-left:20px;margin-right:20px;">
+        <b-container fluid>
+            <div class="title"><h2>Effort Estimation Management</h2></div>
+            <b-row><b-btn size="lg" variant="danger" class="btnAdd" @click="createEffort">&plus;</b-btn></b-row>
+            <table class="Efforts">
+                <tr>
+                    <th>ID</th>
+                    <th>Project ID</th>
+                    <th>Project Scope</th>
+                    <th>Customer</th>
+                    <th>Account</th>
+                    <th>CRM Ticket</th>
+                    <th>Assessment Stakeholder</th>
+                    <th>Created by</th>
+                    <th>Created on</th>
+                    <th style="text-align:center">Status</th>
+                </tr>
 
-        <tr v-for="item in $store.state.efforts" :key="item.id" @click="rowClicked(item.id)">
-            <td>{{parseInt(item.id)}}</td>
-            <td>{{item.projectId}}</td>
-            <td>{{item.projectScope.substring(0,100)}}</td>
-            <td>{{item.customer}}</td>
-            <td>{{item.account}}</td>
-            <td>{{item.crmTicket}}</td>
-            <td>{{item.assessmentStakeholder}}</td>
-            <td>{{item.userid}}</td>
-            <td>{{item.createdOn}}</td>
-            <td style="text-align:center"><b-badge variant="dark">{{ item.status }}</b-badge></td>
-        </tr>
-    </table>
-    </b-container>  
-
+                <tr v-for="item in $store.state.efforts" :key="item.id" @click="rowClicked(item.id)">
+                    <td>{{item.id}}</td>
+                    <td>{{item.projectId}}</td>
+                    <td>{{item.projectScope.substring(0,50) + '...'}}</td>
+                    <td>{{item.customer}}</td>
+                    <td>{{item.account}}</td>
+                    <td>{{item.crmTicket}}</td>
+                    <td>{{item.assessmentStakeholder}}</td>
+                    <td>{{item.userid}}</td>
+                    <td>{{item.createdOn}}</td>
+                    <td style="text-align:center"><b-badge variant="dark">{{ item.status }}</b-badge></td>
+                </tr>
+            </table>
+        </b-container>
+    </div>
 </template>
 
 <script>
@@ -53,24 +41,26 @@ export default {
     name: 'list',
     data() {
         return {
-          
+
         }
     },
+
     methods:{
       rowClicked(id) {
-          console.log(id)
           this.$router.push({name:'list-detail', params: {id: id} })
       },
 
       createEffort() {
         this.$store.dispatch('createEffort', this.$router)
-      }
-  },
+      },
 
-  created() {
-      this.$store.dispatch('getEfforts')
-  }
+    },
+
+    created() {
+        this.$store.dispatch('getEfforts')
+    },
 }
+
 </script>
 
 

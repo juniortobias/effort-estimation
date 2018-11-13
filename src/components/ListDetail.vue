@@ -18,9 +18,13 @@
                     <b-btn @click="cancelEdit" variant="" :disabled=this.disabled>Cancel</b-btn>                    
                 </b-button-group>
                 <b-button-group>
-                    <b-btn variant="success" disabled>Send to Release</b-btn>
-                    <b-btn variant="info" disabled>Vision Document</b-btn>
-                    <b-btn variant="warning" disabled>PDF Version</b-btn>
+                    <b-btn variant="info" disabled>Send to Release</b-btn>
+                    <!-- <b-btn variant="info" disabled>Vision Document</b-btn> -->
+                    <b-btn variant="warning" :disabled="this.effort.status != 'Released'">PDF Version</b-btn>
+                </b-button-group>
+                <b-button-group>
+                    <b-btn variant="success" disabled>Approve</b-btn>
+                    <b-btn variant="danger" disabled>Reject</b-btn>
                 </b-button-group>
                 <b-button-group>
 
@@ -30,7 +34,7 @@
         <b-card bg-variant="light">
             <b-row>
                 <b-col sm="1">
-                    <label :for="'projectID'">Project ID:</label>
+                    <label :for="'projectID'">Project ID (Jira):</label>
                 </b-col>
                 <b-col sm="2">
                     <b-form-input 
@@ -94,24 +98,24 @@
                         </td>
                         <td>
                             <select v-if="!v.profile.$invalid" :disabled=disabled v-bind:class="inputClass" v-model.trim="v.profile.$model">
-                                <option :value="profile.key" v-for="profile in $store.state.profiles" :key="profile.key" :selected="profile.key === v.profile.$model" >{{ profile.value }}</option>
+                                <option :value="profile.id" v-for="profile in $store.state.profiles" :key="profile.id" :selected="profile.id === v.profile.$model" >{{ profile.value }}</option>
                             </select>
                             <select v-else :disabled=disabled  class="inputErrorClass" v-model.trim="v.profile.$model">
-                                <option :value="profile.key" v-for="profile in $store.state.profiles" :key="profile.key" :selected="profile.key === v.profile.$model" >{{ profile.value }}</option>
+                                <option :value="profile.id" v-for="profile in $store.state.profiles" :key="profile.id" :selected="profile.id === v.profile.$model" >{{ profile.value }}</option>
                             </select>
                         </td>
                         <td>
                             <select v-if="!v.role.$invalid" :disabled=disabled v-bind:class="inputClass" v-model.trim="v.role.$model">
-                                <option :value="role.key" v-for="role in filteredRoles(v.profile.$model)" :key="role.key" >
+                                <option :value="role.id" v-for="role in filteredRoles(v.profile.$model)" :key="role.id" >
                                     {{ role.value }}</option>
                             </select>
                             <select v-else :disabled=disabled class="inputErrorClass" v-model.trim="v.role.$model">
-                                <option :value="role.key" v-for="role in filteredRoles(v.profile.$model)" :key="role.key" >
+                                <option :value="role.id" v-for="role in filteredRoles(v.profile.$model)" :key="role.id" >
                                     {{ role.value }}</option>
                             </select>
                         </td>
                         <td>
-                            <select v-if="!v.level.$invalid" :disabled=disabled v-bind:class="inputClass" v-model.trim="v.level.$model" >
+                            <select v-if="!v.level.$invalid" :disabled=disabled v-bind:class="inputClass" v-model.trim="v.level.$model" :selected="fillTime(v.role.$model, v.level.$model,index,v.id.$model)" @change="sumItem(v.id.$model)">
                                 <option :value="level.key" v-for="level in $store.state.levels" :key="level.key" >{{ level.value }}</option>
                             </select>
                             <select v-else :disabled=disabled class="inputErrorClass" v-model.trim="v.level.$model" >
@@ -135,19 +139,9 @@
                                    type="number">
                         </td>
                         <td>
-                            <input v-if="!v.execution.$invalid" :disabled=disabled 
+                            <input disabled 
                                    v-model.trim="v.execution.$model" 
-                                   v-bind:class="inputClass" 
-                                   @keyup="sumItem(v.id.$model)" 
-                                   @change="sumItem(v.id.$model)" 
-                                   class="inputTime"
-                                   type="number">
-                            <input v-else :disabled=disabled 
-                                   v-model.trim="v.execution.$model" 
-                                   v-bind:class="inputClass" 
-                                   @keyup="sumItem(v.id.$model)" 
-                                   @change="sumItem(v.id.$model)" 
-                                   class="inputTime inputErrorClass"
+                                   class="classView inputTime"
                                    type="number">
                         </td>
                         <td>
@@ -285,6 +279,23 @@ export default {
     },
 
     created() {
+        //INITIAL LOADS
+
+        //Roles
+        this.$store.dispatch('getRoles').then(response => {
+             this.$store.state.roles =  response.data.Items
+            }, error => {
+                console.error('Got nothing from server')
+            })
+
+        //Profiles
+        this.$store.dispatch('getProfiles').then(response => {
+             this.$store.state.profiles =  response.data.Items
+            }, error => {
+                console.error('Got nothing from server')
+            })
+
+
         if ( this.$route.hash == 'N' ) {
             this.effort = JSON.parse(JSON.stringify(this.$store.state.effort))
             this.disabled = false
@@ -300,6 +311,20 @@ export default {
     },
 
     methods: {
+        fillTime(role, level, idx, id) {
+            var selRole = this.$store.state.roles.filter(function(item) {
+                    return item.id == role
+                })
+            
+            for (const key in selRole) {
+                const item = selRole[key]
+
+                this.effort.items[idx].execution = item[level]
+                break
+            }
+            this.sumItem(id)
+        },
+
         filteredRoles(profile) {
             if (profile) {
                 return this.$store.state.roles.filter(function(item) {
@@ -444,7 +469,7 @@ export default {
         sumItem(id) {
             const index = this.effort.items.findIndex(item => item.id == id)
             this.effort.items[index].documentation = parseInt((this.effort.items[index].quantity * this.effort.items[index].execution) * 0.20)
-            this.effort.items[index].projectManagement = parseInt((this.effort.items[index].quantity * this.effort.items[index].execution) * 0.100)
+            this.effort.items[index].projectManagement = parseInt((this.effort.items[index].quantity * this.effort.items[index].execution) * 0.10)
         },
   },
     
