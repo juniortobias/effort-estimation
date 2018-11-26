@@ -34,6 +34,9 @@ export const store = new Vuex.Store({
                         crmTicket: '',
                         assessmentStakeholder: '',
                         customer: '',
+                        testPlan: '',
+                        cutoverPlan: '',
+                        premises: '',
                         status: '',
                         items: [
                             {

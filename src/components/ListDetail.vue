@@ -7,6 +7,16 @@
             </div>
         </b-modal>
 
+        <b-modal ref="modalTestPlan" title="Test Plan" @cancel="clearModalChange" no-close-on-esc>
+            <div class="d-block text-center">
+                <b-form-textarea :id="'testPlan'" 
+                                 :rows="5" 
+                                 :disabled=this.disabled 
+                                 v-model="effort.testPlan">
+                </b-form-textarea>
+            </div>
+        </b-modal>
+
         <div class="topNav">
             <span class="title">Effort Estimation ID: {{ effort.id }} <b-badge>{{ effort.status }}</b-badge></span>
             <div class="topNavRight">
@@ -26,48 +36,54 @@
                     <b-btn variant="success" disabled>Approve</b-btn>
                     <b-btn variant="danger" disabled>Reject</b-btn>
                 </b-button-group>
-                <b-button-group>
-
-                </b-button-group>
             </div>
         </div>
-        <b-card bg-variant="light">
-            <b-row>
-                <b-col sm="1">
-                    <label :for="'projectID'">Project ID (Jira):</label>
-                </b-col>
-                <b-col sm="2">
-                    <b-form-input 
-                        :id="'projectId'" 
-                        :disabled=disabled 
-                        v-model="effort.projectId" 
-                        :state="!$v.effort.projectId.required ? false : null"
-                        >
-                    </b-form-input>
-                </b-col>
+            <b-card bg-variant="light">
+                <b-row>
+                    <b-col sm="1">
+                        <label :for="'projectID'">Project ID (Jira):</label>
+                    </b-col>
+                    <b-col sm="2">
+                        <b-form-input 
+                            :id="'projectId'" 
+                            :disabled=disabled 
+                            v-model="effort.projectId" 
+                            :state="!$v.effort.projectId.required ? false : null"
+                            >
+                        </b-form-input>
+                    </b-col>
 
-                <b-col sm="1"><label :for="'crmTicket'">CRM Ticket:</label></b-col>
-                <b-col sm="2"><b-form-input :id="'crmTicket'" :disabled=this.disabled v-model="effort.crmTicket" :state="!$v.effort.crmTicket.required ? false : null"></b-form-input></b-col>
+                    <b-col sm="1"><label :for="'crmTicket'">CRM Ticket:</label></b-col>
+                    <b-col sm="2"><b-form-input :id="'crmTicket'" :disabled=this.disabled v-model="effort.crmTicket" :state="!$v.effort.crmTicket.required ? false : null"></b-form-input></b-col>
 
-                <b-col sm="1"><label :for="'dateTime'">Created on:</label></b-col>
-                <b-col sm="2"><b-form-input :id="'dateTime'" :disabled=true v-model="effort.createdOn"></b-form-input></b-col>
-            </b-row>
-            <b-row>
-                <b-col sm="1"><label :for="'assessmentStakeholder'">Assessment Stakeholder:</label></b-col>
-                <b-col sm="2"><b-form-input :id="'assessmentStakeholder'" :disabled=this.disabled v-model="effort.assessmentStakeholder" :state="!$v.effort.assessmentStakeholder.required ? false : null"></b-form-input></b-col>
+                    <b-col sm="1"><label :for="'dateTime'">Created on:</label></b-col>
+                    <b-col sm="2"><b-form-input :id="'dateTime'" :disabled=true v-model="effort.createdOn"></b-form-input></b-col>
 
-                <b-col sm="1"><label :for="'customer'">Customer:</label></b-col>
-                <b-col sm="2"><b-form-input :id="'customer'" :disabled=this.disabled v-model="effort.customer" :state="!$v.effort.customer.required ? false : null"></b-form-input></b-col>
+                    <b-col sm="1" style="text-align:left">Test Plan:</b-col>
+                    <b-col sm="1"><img src="../assets/test.png" class="testIcon" @click="showModal('modalTestPlan')"></b-col>
+                </b-row>
+                <b-row>
+                    <b-col sm="1"><label :for="'assessmentStakeholder'">Assessment Stakeholder:</label></b-col>
+                    <b-col sm="2"><b-form-input :id="'assessmentStakeholder'" :disabled=this.disabled v-model="effort.assessmentStakeholder" :state="!$v.effort.assessmentStakeholder.required ? false : null"></b-form-input></b-col>
 
-                <b-col sm="1"><label :for="'account'">Account:</label></b-col>
-                <b-col sm="2"><b-form-input :id="'account'" :disabled=this.disabled v-model="effort.account" :state="!$v.effort.account.required ? false : null"></b-form-input></b-col>
-            </b-row>
-            <br>
-            <b-row>
-                <b-col sm="1" style="margin-top:1px;"><label :for="'projectScope'">Project Scope:</label></b-col>
-                <b-col sm="8"><b-form-textarea :id="'projectScope'" :rows="5" :disabled=this.disabled v-model="effort.projectScope" :state="!$v.effort.projectScope.required ? false : null"></b-form-textarea></b-col>
-            </b-row>     
-        </b-card>
+                    <b-col sm="1"><label :for="'customer'">Customer:</label></b-col>
+                    <b-col sm="2"><b-form-input :id="'customer'" :disabled=this.disabled v-model="effort.customer" :state="!$v.effort.customer.required ? false : null"></b-form-input></b-col>
+
+                    <b-col sm="1"><label :for="'account'">Account:</label></b-col>
+                    <b-col sm="2"><b-form-input :id="'account'" :disabled=this.disabled v-model="effort.account" :state="!$v.effort.account.required ? false : null"></b-form-input></b-col>
+
+                    <b-col sm="1" style="text-align:left">Cutover Plan:</b-col>
+                    <b-col sm="1"><img src="../assets/cutover.png" class="testIcon"></b-col>
+                </b-row>
+                <br>
+                <b-row style="margin-top:-14px">
+                    <b-col sm="1" style="margin-top:0px;"><label :for="'projectScope'">Project Scope:</label></b-col>
+                    <b-col sm="8"><b-form-textarea :id="'projectScope'" :rows="5" :disabled=this.disabled v-model="effort.projectScope" :state="!$v.effort.projectScope.required ? false : null"></b-form-textarea></b-col>
+
+                    <b-col sm="1" style="text-align:left;margin-top:0px">Premises:</b-col>
+                    <b-col sm="1" style="text-align:left;margin-top:0px"><img src="../assets/premise.png" class="testIcon"></b-col>
+                </b-row>   
+            </b-card>
         <br>
             <b-container fluid>
             <b-row><b-btn size="lg" variant="danger" class="btnAdd" @click="addActivity" :disabled=this.disabled>&plus;</b-btn></b-row>
@@ -83,7 +99,7 @@
                     <th style="width:1px">Execution</th>
                     <th style="width:1px">Document.</th>
                     <th style="width:1px">Proj.Mng.</th>
-                    <th v-if="!disabled" style="text-align: center;"><img src="../assets/menu.png"></th>
+                    <th v-if="!disabled" style="text-align:center;"><img src="../assets/menu.png" height="22px"></th>
                 </tr>
 
                     <tr v-for="(v, index) in $v.effort.items.$each.$iter" :key="index">
@@ -152,7 +168,7 @@
                             <input disabled 
                                    v-model.trim="v.projectManagement.$model" 
                                    class="classView inputTime"></td>    
-                        <td v-if="!disabled" class="itemControl" ><img src="../assets/garbage.png" @click="removeItem(v.id.$model)"></td>
+                        <td v-if="!disabled" class="itemControl" ><img src="../assets/garbage.png"  height="18px" @click="removeItem(v.id.$model)"></td>
                     </tr>                    
             </table>
             </b-container>
@@ -196,6 +212,7 @@ export default {
             disabled: true,
             effort: Object,
             beforeEditCache: Object,
+            beforeModalChance: { testPlan:'', cutoverPlan:'', premises:''}
         }
     },
 
@@ -311,6 +328,26 @@ export default {
     },
 
     methods: {
+        clearModalChange() {
+            this.effort.testPlan = this.beforeModalChance.testPlan
+            this.effort.cutoverPlan = this.beforeModalChance.cutoverPlan
+            this.effort.premises = this.beforeModalChance.premises
+        },
+
+        showModal(modal) {
+            const object = this.$refs[modal]
+            if (this.effort.testPlan) {
+                this.beforeModalChance.testPlan = JSON.parse(JSON.stringify(this.effort.testPlan))
+            }
+            if (this.effort.cutoverPlan) {
+                this.beforeModalChance.cutoverPlan = JSON.parse(JSON.stringify(this.effort.cutoverPlan))
+            }
+            if (this.effort.premises) {
+                this.beforeModalChance.premises = JSON.parse(JSON.stringify(this.effort.premises))
+            }
+            object.show()
+        },
+
         fillTime(role, level, idx, id) {
             var selRole = this.$store.state.roles.filter(function(item) {
                     return item.id == role
@@ -344,8 +381,8 @@ export default {
             for (const key1 in this.$store.state.profiles) {
                 const element = this.$store.state.profiles[key1]
                 
-                if (element.value == term) {
-                    key = element.key
+                if (element.value == term) {                 
+                    key = element.id
                     value = element.value.toLowerCase()
                     break
                 }
@@ -362,6 +399,7 @@ export default {
                     sum = sum + element.projectManagement
                 }
                 
+
                 if (element.profile == key) {
                     sum = sum + (element.execution * element.quantity)
                 }
@@ -499,6 +537,15 @@ export default {
 }
 
 .itemControl:hover {
+    opacity: 1;
+}
+
+.testIcon {
+    cursor: pointer;
+    opacity: 0.5;
+}
+
+.testIcon:hover {
     opacity: 1;
 }
 
