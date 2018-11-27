@@ -1,18 +1,57 @@
 
 <template>
     <div>
-        <b-modal ref="modalError" hide-footer size="mm" centered header-bg-variant="danger" header-text-variant="light" title="Validation">
+        <!-- ROADMAP VALIDATION MODAL -->
+        <b-modal ref="modalRoadmapValidation" hide-footer size="mm" centered header-bg-variant="danger" header-text-variant="light" title="Roadmap Validation">
+            <div class="d-block text-center">
+                <h3>The sum of profile execution must be greater than 0</h3>
+            </div>
+        </b-modal>
+
+        <!-- DELETE EFFORT MODAL -->
+        <b-modal ref="modalQuestion" size="mm" hide-footer centered header-bg-variant="danger" header-text-variant="light" title="Delete Confirmation" @ok="deleteEffort">
+            <div class="d-block text-center">
+                <h3>Are you sure you want to delete this Effort Estimation?</h3>
+            </div>
+            <b-btn class="mt-3" variant="outline-danger" block @click="deleteEffort">Delete</b-btn>
+        </b-modal>
+
+        <!-- VALIDATION FORM MODAL -->
+        <b-modal ref="modalError" hide-footer size="mm" centered header-bg-variant="danger" header-text-variant="light" title="Document Validation">
             <div class="d-block text-center">
                 <h3>The Effort Estimation form is <span style="color: red">incomplete</span></h3>
             </div>
         </b-modal>
 
-        <b-modal ref="modalTestPlan" title="Test Plan" @cancel="clearModalChange" no-close-on-esc>
+        <!-- TEST PLAN MODAL -->
+        <b-modal ref="modalTestPlan" title="Test Plan" @cancel="clearModalChange" no-close-on-esc size="lg">
             <div class="d-block text-center">
                 <b-form-textarea :id="'testPlan'" 
                                  :rows="5" 
                                  :disabled=this.disabled 
                                  v-model="effort.testPlan">
+                </b-form-textarea>
+            </div>
+        </b-modal>
+
+        <!-- CUTOVER PLAN MODAL -->
+        <b-modal ref="modalCutoverPlan" title="Cutover Plan" @cancel="clearModalChange" no-close-on-esc size="lg">
+            <div class="d-block text-center">
+                <b-form-textarea :id="'cutoverPlan'" 
+                                 :rows="5" 
+                                 :disabled=this.disabled 
+                                 v-model="effort.cutoverPlan">
+                </b-form-textarea>
+            </div>
+        </b-modal>
+
+        <!-- PREMISES MODAL -->
+        <b-modal ref="modalPremises" title="Premises" @cancel="clearModalChange" no-close-on-esc size="lg">
+            <div class="d-block text-center">
+                <b-form-textarea :id="'premises'" 
+                                 :rows="5" 
+                                 :disabled=this.disabled 
+                                 v-model="effort.premises">
                 </b-form-textarea>
             </div>
         </b-modal>
@@ -23,12 +62,12 @@
                 <b-btn @click="backToList" variant="secondary">Back</b-btn>
                 <b-button-group>
                     <b-btn @click="editEffort" :disabled=!this.disabled>Edit</b-btn>
-                    <b-btn @click="deleteEffort" :disabled=!this.disabled variant="danger">Delete</b-btn>
+                    <b-btn @click="showModal('modalQuestion')" :disabled=!this.disabled variant="danger">Delete</b-btn>
                     <b-btn @click="saveEffort" variant="" :disabled=this.disabled>Save</b-btn>
                     <b-btn @click="cancelEdit" variant="" :disabled=this.disabled>Cancel</b-btn>                    
                 </b-button-group>
                 <b-button-group>
-                    <b-btn variant="info" disabled>Send to Release</b-btn>
+                    <b-btn variant="info" :disabled=!sendToRelease>Send to Release</b-btn>
                     <!-- <b-btn variant="info" disabled>Vision Document</b-btn> -->
                     <b-btn variant="warning" :disabled="this.effort.status != 'Released'">PDF Version</b-btn>
                 </b-button-group>
@@ -54,7 +93,8 @@
                     </b-col>
 
                     <b-col sm="1"><label :for="'crmTicket'">CRM Ticket:</label></b-col>
-                    <b-col sm="2"><b-form-input :id="'crmTicket'" :disabled=this.disabled v-model="effort.crmTicket" :state="!$v.effort.crmTicket.required ? false : null"></b-form-input></b-col>
+                    <!-- <b-col sm="2"><b-form-input :id="'crmTicket'" :disabled=this.disabled v-model="effort.crmTicket" :state="!$v.effort.crmTicket.required ? false : null"></b-form-input></b-col> -->
+                    <b-col sm="2"><b-form-input :id="'crmTicket'" :disabled=this.disabled v-model="effort.crmTicket"></b-form-input></b-col>
 
                     <b-col sm="1"><label :for="'dateTime'">Created on:</label></b-col>
                     <b-col sm="2"><b-form-input :id="'dateTime'" :disabled=true v-model="effort.createdOn"></b-form-input></b-col>
@@ -73,7 +113,7 @@
                     <b-col sm="2"><b-form-input :id="'account'" :disabled=this.disabled v-model="effort.account" :state="!$v.effort.account.required ? false : null"></b-form-input></b-col>
 
                     <b-col sm="1" style="text-align:left">Cutover Plan:</b-col>
-                    <b-col sm="1"><img src="../assets/cutover.png" class="testIcon"></b-col>
+                    <b-col sm="1"><img src="../assets/cutover.png" class="testIcon" @click="showModal('modalCutoverPlan')"></b-col>
                 </b-row>
                 <br>
                 <b-row style="margin-top:-14px">
@@ -81,7 +121,7 @@
                     <b-col sm="8"><b-form-textarea :id="'projectScope'" :rows="5" :disabled=this.disabled v-model="effort.projectScope" :state="!$v.effort.projectScope.required ? false : null"></b-form-textarea></b-col>
 
                     <b-col sm="1" style="text-align:left;margin-top:0px">Premises:</b-col>
-                    <b-col sm="1" style="text-align:left;margin-top:0px"><img src="../assets/premise.png" class="testIcon"></b-col>
+                    <b-col sm="1" style="text-align:left;margin-top:0px"><img src="../assets/premise.png" class="testIcon" @click="showModal('modalPremises')"></b-col>
                 </b-row>   
             </b-card>
         <br>
@@ -187,14 +227,38 @@
                     <th style="text-align:center">Documentation <b-badge>{{ sumDocumentation }}</b-badge></th>
                 </tr>
 
-                    <tr v-for="item in effort.roadmap" :key="item.phase">
+                    <tr v-for="(item) in effort.roadmap" :key="item.phase">
                         <td>{{item.phase}}</td>
-                        <td><input :disabled=disabled v-model="item.architecture" v-bind:class="inputClass" type="number" class="inputTime"></td>
-                        <td><input :disabled=disabled v-model="item.functional" v-bind:class="inputClass" type="number" class="inputTime"></td>
-                        <td><input :disabled=disabled v-model="item.integration" v-bind:class="inputClass" type="number" class="inputTime"></td>
-                        <td><input :disabled=disabled v-model="item.development" v-bind:class="inputClass" type="number" class="inputTime"></td>
-                        <td><input :disabled=disabled v-model="item.projectmanagement" v-bind:class="inputClass" type="number" class="inputTime"></td>
-                        <td><input :disabled=disabled v-model="item.documentation" v-bind:class="inputClass" type="number" class="inputTime"></td>
+                        <td>
+                            <input :disabled=disabled
+                                    v-model="item.architecture" 
+                                    v-bind:class="inputClass" 
+                                    type="number" 
+                                    class="inputTime" 
+                                    @keyup="validateRoadmap('architecture',sumArchitecture,item.id)"
+                                    @change="validateRoadmap('architecture',sumArchitecture,item.id)">
+                        </td>
+                        <td>
+                            <input :disabled=disabled 
+                                    v-model="item.functional" 
+                                    v-bind:class="inputClass" 
+                                    type="number" 
+                                    class="inputTime"
+                                    @keyup="validateRoadmap('functional',sumFunctional,item.id)"
+                                    @change="validateRoadmap('functional',sumFunctional,item.id)">
+                        </td>
+                        <td>
+                            <input :disabled=disabled v-model="item.integration" v-bind:class="inputClass" type="number" class="inputTime">
+                        </td>
+                        <td>
+                            <input :disabled=disabled v-model="item.development" v-bind:class="inputClass" type="number" class="inputTime">
+                        </td>
+                        <td>
+                            <input :disabled=disabled v-model="item.projectmanagement" v-bind:class="inputClass" type="number" class="inputTime">
+                        </td>
+                        <td>
+                            <input :disabled=disabled v-model="item.documentation" v-bind:class="inputClass" type="number" class="inputTime">
+                        </td>
                     </tr>
             </table>
             </b-container>            
@@ -212,7 +276,7 @@ export default {
             disabled: true,
             effort: Object,
             beforeEditCache: Object,
-            beforeModalChance: { testPlan:'', cutoverPlan:'', premises:''}
+            beforeModalChance: { testPlan:null, cutoverPlan:null, premises:null},
         }
     },
 
@@ -224,9 +288,9 @@ export default {
             projectScope: {
                 required
             },
-            crmTicket: {
-                required
-            },
+            // crmTicket: {
+            //     required
+            // },
             assessmentStakeholder: {
                 required
             },
@@ -236,7 +300,6 @@ export default {
             account: {
                 required
             },
-
             items: {
                 $each: {
                     id: {
@@ -270,7 +333,7 @@ export default {
                         required
                     },
                 }
-            }
+            },
         }
     },
 
@@ -293,11 +356,17 @@ export default {
         sumDocumentation: function () {
             return this.sum('documentation')
         },
+        sendToRelease: function() {
+            if ( this.sumArchitecture == 0 && this.sumFunctional == 0 && this.sumIntegration == 0 && this.sumDevelopment == 0 && this.sumProjectManagement == 0 && this.sumDocumentation == 0){
+                return true
+            } else {
+                return false
+            }
+        }
     },
 
     created() {
         //INITIAL LOADS
-
         //Roles
         this.$store.dispatch('getRoles').then(response => {
              this.$store.state.roles =  response.data.Items
@@ -328,6 +397,16 @@ export default {
     },
 
     methods: {
+        validateRoadmap(profile, sum, id) {
+            const idx = this.effort.roadmap.findIndex(item => item.id == id)
+            const item = this.effort.roadmap[idx]
+            
+            if (sum && sum < 0){
+                this.$refs['modalRoadmapValidation'].show()
+                item[profile] = 0
+            }
+        },
+
         clearModalChange() {
             this.effort.testPlan = this.beforeModalChance.testPlan
             this.effort.cutoverPlan = this.beforeModalChance.cutoverPlan
@@ -336,6 +415,7 @@ export default {
 
         showModal(modal) {
             const object = this.$refs[modal]
+
             if (this.effort.testPlan) {
                 this.beforeModalChance.testPlan = JSON.parse(JSON.stringify(this.effort.testPlan))
             }
@@ -349,25 +429,31 @@ export default {
         },
 
         fillTime(role, level, idx, id) {
-            var selRole = this.$store.state.roles.filter(function(item) {
-                    return item.id == role
-                })
-            
-            for (const key in selRole) {
-                const item = selRole[key]
+            if (this.$store.state.roles) {
+                const selRole = this.$store.state.roles.filter(function(item) {
+                        return item.id == role
+                    })
+                
+                for (const key in selRole) {
+                    const item = selRole[key]
 
-                this.effort.items[idx].execution = item[level]
-                break
+                    this.effort.items[idx].execution = item[level] * this.effort.items[idx].quantity
+                    break
+                }
+                this.sumItem(id)
+            } else {
+                console.log('fillTime')
             }
-            this.sumItem(id)
         },
 
         filteredRoles(profile) {
-            if (profile) {
+            if ( profile || this.$store.state.roles ) {
                 return this.$store.state.roles.filter(function(item) {
                     return item.parent == profile
                 })
-            } 
+            } else {
+                console.log('filteredRoles')
+            }
         },
 
         sum(term) {
@@ -401,7 +487,8 @@ export default {
                 
 
                 if (element.profile == key) {
-                    sum = sum + (element.execution * element.quantity)
+                    // sum = sum + (element.execution * element.quantity)
+                    sum = sum + (element.execution)
                 }
             }
             
@@ -410,19 +497,24 @@ export default {
 
                 if ( term == 'documentation' ) {
                     allocated = allocated + parseInt(roadmap.documentation)
-                    break
+                    continue
                 }
 
                 if ( term == 'projectmanagement' ) {
                     allocated = allocated + parseInt(roadmap.projectmanagement)
-                    break
+                    continue
                 }                
 
                 field = parseInt(roadmap[value])
                 allocated = allocated + field
             }
 
-            return sum - allocated
+            const calc = sum - allocated
+            if (calc) {
+                return calc
+            } else {
+                return 0
+            }
         },
 
         addActivity() {
@@ -439,7 +531,6 @@ export default {
                 pk = 1
             }
             
-            
             this.effort.items.push({id:pk, activity:'', description:'', profile:'', role:'', level:'', quantity:0, execution:0, documentation:0, projectManagement:0, })
         },
 
@@ -448,7 +539,7 @@ export default {
         },
 
         deleteEffort() {
-             this.$store.dispatch('deleteEffort', this.$route.params.id).then(response => {
+            this.$store.dispatch('deleteEffort', this.$route.params.id).then(response => {
                  this.$router.push({ name: "list" })})
         },
 
@@ -471,6 +562,7 @@ export default {
         },
 
         saveEffort() {
+            console.log(this.$v.effort.$invalid)
             if(this.$v.effort.$invalid) {
                 this.$v.effort.$reset
                 this.$refs.modalError.show()
@@ -506,8 +598,10 @@ export default {
 
         sumItem(id) {
             const index = this.effort.items.findIndex(item => item.id == id)
-            this.effort.items[index].documentation = parseInt((this.effort.items[index].quantity * this.effort.items[index].execution) * 0.20)
-            this.effort.items[index].projectManagement = parseInt((this.effort.items[index].quantity * this.effort.items[index].execution) * 0.10)
+            // this.effort.items[index].documentation = parseInt((this.effort.items[index].quantity * this.effort.items[index].execution) * 0.20)
+            // this.effort.items[index].projectManagement = parseInt((this.effort.items[index].quantity * this.effort.items[index].execution) * 0.10)
+            this.effort.items[index].documentation = parseInt(this.effort.items[index].execution * 0.20)
+            this.effort.items[index].projectManagement = parseInt(this.effort.items[index].execution * 0.10)
         },
   },
     

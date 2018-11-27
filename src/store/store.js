@@ -30,13 +30,13 @@ export const store = new Vuex.Store({
                         projectScope: '',
                         userid: '',
                         createdOn: '',
-                        account: '',
-                        crmTicket: '',
+                        account: null,
+                        crmTicket: null,
                         assessmentStakeholder: '',
                         customer: '',
-                        testPlan: '',
-                        cutoverPlan: '',
-                        premises: '',
+                        testPlan: null,
+                        cutoverPlan: null,
+                        premises: null,
                         status: '',
                         items: [
                             {
@@ -55,6 +55,7 @@ export const store = new Vuex.Store({
                         ],
                         roadmap: [
                             {
+                                'id': 1,
                                 'phase':'Project Preparation',
                                 'architecture': 0,
                                 'functional': 0,
@@ -64,6 +65,7 @@ export const store = new Vuex.Store({
                                 'documentation':0
                             },
                             {
+                                'id': 2,
                                 'phase':'Business Blueprint',
                                 'architecture': 0,
                                 'functional': 0,
@@ -73,6 +75,7 @@ export const store = new Vuex.Store({
                                 'documentation':0
                             }, 
                             {
+                                'id': 3,
                                 'phase':'Realization',
                                 'architecture': 0,
                                 'functional': 0,
@@ -82,6 +85,7 @@ export const store = new Vuex.Store({
                                 'documentation':0
                             },
                             {
+                                'id': 4,
                                 'phase':'Final Preparation',
                                 'architecture': 0,
                                 'functional': 0,
@@ -91,6 +95,7 @@ export const store = new Vuex.Store({
                                 'documentation':0
                             }, 
                             {
+                                'id': 5,
                                 'phase':'Go-Live',
                                 'architecture': 0,
                                 'functional': 0,
