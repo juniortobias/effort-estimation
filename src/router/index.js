@@ -7,15 +7,24 @@ Vue.use(Router)
 
 export default new Router({
   routes: [
+    // {
+    //   path: '/',
+    //   name: 'auth',
+    //   component: Auth
+    // },
+
     {
+      // path: '/',
       path: '/',
       name: 'list',
       component: List
     },
+
     {
       path: '/list-detail/:id',
       name: 'list-detail',
       component: ListDetail
     },
+
   ]
 })

@@ -61,15 +61,17 @@
             <div class="topNavRight">
                 <b-btn @click="backToList" variant="secondary">Back</b-btn>
                 <b-button-group>
-                    <b-btn @click="editEffort" :disabled=!this.disabled>Edit</b-btn>
-                    <b-btn @click="showModal('modalQuestion')" :disabled=!this.disabled variant="danger">Delete</b-btn>
-                    <b-btn @click="saveEffort" variant="" :disabled=this.disabled>Save</b-btn>
-                    <b-btn @click="cancelEdit" variant="" :disabled=this.disabled>Cancel</b-btn>                    
+                    <!-- <b-btn @click="editEffort" :disabled=!disabled>Edit</b-btn> -->
+                    <b-btn @click="editEffort" :disabled="!disabled || effort.status == 'Waiting Release' || effort.status == 'Released'">Edit</b-btn>
+                    <b-btn @click="showModal('modalQuestion')" :disabled="!disabled || effort.status == 'Waiting Release' || effort.status == 'Released'" variant="danger">Delete</b-btn>
+                    <b-btn @click="saveEffort" variant="" :disabled=disabled>Save</b-btn>
+                    <b-btn @click="cancelEdit" variant="" :disabled=disabled>Cancel</b-btn>                    
                 </b-button-group>
                 <b-button-group>
-                    <b-btn variant="info" :disabled=!sendToRelease>Send to Release</b-btn>
+                    <b-btn variant="info" @click="askToRelease" :disabled="!sendToRelease">Send to Release</b-btn>
                     <!-- <b-btn variant="info" disabled>Vision Document</b-btn> -->
-                    <b-btn variant="warning" :disabled="this.effort.status != 'Released'">PDF Version</b-btn>
+                    <!-- <b-btn variant="warning" @click="generatePDF()" :disabled="effort.status != 'Released'">PDF Version</b-btn> -->
+                    <b-btn variant="warning" @click="generatePDF()">PDF Version</b-btn>
                 </b-button-group>
                 <b-button-group>
                     <b-btn variant="success" disabled>Approve</b-btn>
@@ -118,7 +120,7 @@
                 <br>
                 <b-row style="margin-top:-14px">
                     <b-col sm="1" style="margin-top:0px;"><label :for="'projectScope'">Project Scope:</label></b-col>
-                    <b-col sm="8"><b-form-textarea :id="'projectScope'" :rows="5" :disabled=this.disabled v-model="effort.projectScope" :state="!$v.effort.projectScope.required ? false : null"></b-form-textarea></b-col>
+                    <b-col sm="8"><b-form-textarea :id="'projectScope'" :rows="5" :max-rows="5" :disabled=this.disabled v-model="effort.projectScope" :state="!$v.effort.projectScope.required ? false : null"></b-form-textarea></b-col>
 
                     <b-col sm="1" style="text-align:left;margin-top:0px">Premises:</b-col>
                     <b-col sm="1" style="text-align:left;margin-top:0px"><img src="../assets/premise.png" class="testIcon" @click="showModal('modalPremises')"></b-col>
@@ -127,7 +129,7 @@
         <br>
             <b-container fluid>
             <b-row><b-btn size="lg" variant="danger" class="btnAdd" @click="addActivity" :disabled=this.disabled>&plus;</b-btn></b-row>
-            <table class="actTable">
+            <table class="actTable" id="items">
                 <tr>
                     <th>ID</th>
                     <th>Activity</th>
@@ -248,16 +250,40 @@
                                     @change="validateRoadmap('functional',sumFunctional,item.id)">
                         </td>
                         <td>
-                            <input :disabled=disabled v-model="item.integration" v-bind:class="inputClass" type="number" class="inputTime">
+                            <input :disabled=disabled 
+                                    v-model="item.integration" 
+                                    v-bind:class="inputClass" 
+                                    type="number" 
+                                    class="inputTime"
+                                    @keyup="validateRoadmap('integration',sumIntegration,item.id)"
+                                    @change="validateRoadmap('integration',sumIntegration,item.id)">
                         </td>
                         <td>
-                            <input :disabled=disabled v-model="item.development" v-bind:class="inputClass" type="number" class="inputTime">
+                            <input :disabled=disabled 
+                                    v-model="item.development" 
+                                    v-bind:class="inputClass" 
+                                    type="number" 
+                                    class="inputTime"
+                                    @keyup="validateRoadmap('development',sumDevelopment,item.id)"
+                                    @change="validateRoadmap('development',sumDevelopment,item.id)">
                         </td>
                         <td>
-                            <input :disabled=disabled v-model="item.projectmanagement" v-bind:class="inputClass" type="number" class="inputTime">
+                            <input :disabled=disabled 
+                                    v-model="item.projectmanagement" 
+                                    v-bind:class="inputClass" 
+                                    type="number" 
+                                    class="inputTime"
+                                    @keyup="validateRoadmap('projectmanagement',sumProjectManagement,item.id)"
+                                    @change="validateRoadmap('projectmanagement',sumProjectManagement,item.id)">
                         </td>
                         <td>
-                            <input :disabled=disabled v-model="item.documentation" v-bind:class="inputClass" type="number" class="inputTime">
+                            <input :disabled=disabled 
+                                    v-model="item.documentation" 
+                                    v-bind:class="inputClass" 
+                                    type="number" 
+                                    class="inputTime"
+                                    @keyup="validateRoadmap('documentation',sumDocumentation,item.id)"
+                                    @change="validateRoadmap('documentation',sumDocumentation,item.id)">
                         </td>
                     </tr>
             </table>
@@ -267,6 +293,7 @@
 
 <script>
 import { required, minLength, between } from 'vuelidate/lib/validators'
+import jsPDF from 'jsPDF'
 
 export default {
     name: 'list-detail',
@@ -357,12 +384,20 @@ export default {
             return this.sum('documentation')
         },
         sendToRelease: function() {
-            if ( this.sumArchitecture == 0 && this.sumFunctional == 0 && this.sumIntegration == 0 && this.sumDevelopment == 0 && this.sumProjectManagement == 0 && this.sumDocumentation == 0){
-                return true
+            if ( this.sumArchitecture == 0 && 
+                 this.sumFunctional == 0 && 
+                 this.sumIntegration == 0 && 
+                 this.sumDevelopment == 0 && 
+                 this.sumProjectManagement == 0 && 
+                 this.sumDocumentation == 0 && 
+                 this.disabled &&
+                 this.effort.status != 'Waiting Release' && 
+                 this.effort.status != 'Released'){
+                    return true
             } else {
-                return false
+                    return false
             }
-        }
+        },
     },
 
     created() {
@@ -397,9 +432,95 @@ export default {
     },
 
     methods: {
+        generatePDF(){
+            var doc = new jsPDF('p', 'mm')
+
+            doc.setFontStyle("bold"); doc.text('Effort Estimation', 80, 15);
+            doc.line(10, 17, 200, 17)
+
+            doc.setFontSize(10)
+            doc.setFontStyle("bold");   doc.text('ID: ', 10, 25);
+            doc.setFontStyle("normal"); doc.text(this.effort.id, 15, 25);
+            doc.text(' | ' + this.effort.status, 19, 25)
+
+            //LINE 1
+            doc.setFontStyle("bold");   doc.text('Project ID (Jira):', 10, 35);
+            doc.setFontStyle("normal"); doc.text(this.effort.projectId, 54, 35)
+
+            doc.setFontStyle("bold");   doc.text('CRM Ticket:', 90, 35);
+            if (this.effort.crmTicket){
+                doc.setFontStyle("normal"); doc.text(this.effort.crmTicket, 111, 35)
+            }
+
+            doc.setFontStyle("bold");   doc.text('Created on:', 140, 35);
+            doc.setFontStyle("normal"); doc.text(this.effort.createdOn, 160, 35)
+
+            //LINE 2
+            doc.setFontStyle("bold");   doc.text('Assessment Stakeholder:', 10, 41);
+            doc.setFontStyle("normal"); doc.text(this.effort.assessmentStakeholder, 54, 41)
+
+            doc.setFontStyle("bold");   doc.text('Customer:', 90, 41);
+            doc.setFontStyle("normal"); doc.text(this.effort.customer, 111, 41)
+
+            doc.setFontStyle("bold");   doc.text('Account:', 140, 41);
+            doc.setFontStyle("normal"); doc.text(this.effort.account, 160, 41)
+
+            doc.setFontStyle("bold");   doc.text('Project Scope', 10, 52);
+            doc.line(10, 53, 100, 53)
+            doc.setFontStyle("normal"); doc.text(this.effort.projectScope, 10, 58)
+
+
+            doc.addPage('a4','p');
+            doc.setFontStyle("bold");   doc.text('Test Plan', 10, 15);
+            doc.line(10, 16, 100, 16)
+            if (this.effort.testPlan) {
+                doc.setFontStyle("normal"); doc.text(this.effort.testPlan, 10, 22)
+            }
+
+            doc.setFontStyle("bold");   doc.text('Cutover Plan', 10, 150);
+            doc.line(10, 151, 100, 151)
+            if (this.effort.testPlan) {
+                doc.setFontStyle("normal"); doc.text(this.effort.cutoverPlan, 10, 156)
+            }
+
+            doc.addPage('a4','p');
+            doc.setFontStyle("bold");   doc.text('Items', 10, 15);
+            doc.line(10, 16, 100, 16)
+
+            var line = 22
+            for (const idx in this.effort.items ){
+                const item = JSON.parse(JSON.stringify(this.effort.items[idx]))
+
+                doc.setFontStyle("normal"); doc.text(item.id.toString(), 10, line)
+                doc.setFontStyle("normal"); doc.text(item.activity.toString(), 15, line)
+                doc.setFontStyle("normal"); doc.text(item.description.toString(), 60, line)
+                
+                // for (const idx in this.$store.state.profiles){
+                //     const profile = this.$store.state.profiles[idx]
+                //     if (item.profile == profile.id){
+                //         return item
+                //     }
+                // }
+
+                line = line + 5
+            }
+            doc.save('a4.pdf')
+        },
+
+        askToRelease() {
+            this.effort.status = 'Waiting Release'
+            this.$store.dispatch('askToRelease', this.effort).then(response => {
+                        this.$router.push({ name: "list" })
+                    })
+        },
+
         validateRoadmap(profile, sum, id) {
             const idx = this.effort.roadmap.findIndex(item => item.id == id)
             const item = this.effort.roadmap[idx]
+
+            if (!item[profile] || item[profile] < 0){
+                item[profile] = 0
+            }
             
             if (sum && sum < 0){
                 this.$refs['modalRoadmapValidation'].show()
@@ -429,7 +550,7 @@ export default {
         },
 
         fillTime(role, level, idx, id) {
-            if (this.$store.state.roles) {
+            if (this.$store.state.roles[0]) {
                 const selRole = this.$store.state.roles.filter(function(item) {
                         return item.id == role
                     })
@@ -441,18 +562,14 @@ export default {
                     break
                 }
                 this.sumItem(id)
-            } else {
-                console.log('fillTime')
             }
         },
 
         filteredRoles(profile) {
-            if ( profile || this.$store.state.roles ) {
+            if ( profile || this.$store.state.roles[0] ) {
                 return this.$store.state.roles.filter(function(item) {
                     return item.parent == profile
                 })
-            } else {
-                console.log('filteredRoles')
             }
         },
 
@@ -562,7 +679,6 @@ export default {
         },
 
         saveEffort() {
-            console.log(this.$v.effort.$invalid)
             if(this.$v.effort.$invalid) {
                 this.$v.effort.$reset
                 this.$refs.modalError.show()

@@ -180,20 +180,21 @@ export const store = new Vuex.Store({
         },
 
         getEfforts(context) {
-            axios.post('/efforts', {
-                data: {
-                    operation: 'list',
-                    tableName: 'effortEstimation-efforts',
-                    payload: {
-                        TableName: 'effortEstimation-efforts'
+            return new Promise ((resolve, reject) => {
+                axios.post('/efforts', {
+                    data: {
+                        operation: 'list',
+                        tableName: 'effortEstimation-efforts',
+                        payload: {
+                            TableName: 'effortEstimation-efforts'
+                        }
                     }
-                }
-            })
-            .then(response => {
-                this.state.efforts = response.data.Items
-            })
-            .catch(error => {
-                console.log(error)
+                }).then(response => {
+                    resolve(this.state.efforts = response.data.Items);
+                }, error => {
+                    reject(error);
+                })
+
             })
         },
 
@@ -207,6 +208,25 @@ export const store = new Vuex.Store({
                             Key: {
                                 id: id
                             }
+                        }
+                    }
+                }).then(response => {
+                    resolve(response);
+                }, error => {
+                    reject(error);
+                })
+
+            })
+        },
+
+        askToRelease(context, effort) {
+            return new Promise ((resolve, reject) => {
+                axios.post('/efforts', {
+                    data: {
+                        operation: 'create',
+                        tableName: 'effortEstimation-efforts',
+                        payload: {
+                            Item: effort
                         }
                     }
                 }).then(response => {
