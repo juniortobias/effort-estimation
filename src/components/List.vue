@@ -19,11 +19,10 @@
                     <th>Created on</th>
                     <th style="text-align:center">Status</th>
                 </tr>
-
                 <tr v-for="item in this.efforts" :key="item.id" @click="rowClicked(item.id)">
                     <td>{{item.id}}</td>
                     <td>{{item.projectId}}</td>
-                    <td>{{item.projectScope.substring(0,60) + '...'}}</td>
+                    <td>{{item.projectScope.substring(0,35) + '...'}}</td>
                     <td>{{item.customer}}</td>
                     <td>{{item.account}}</td>
                     <td>{{item.crmTicket}}</td>

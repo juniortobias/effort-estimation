@@ -26,5 +26,6 @@ export default new Router({
       component: ListDetail
     },
 
-  ]
+  ],
+  mode: 'history'
 })
